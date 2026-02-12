@@ -1,9 +1,7 @@
 (function () {
   "use strict";
 
-  // ----------------------------
   // Sidebar toggle
-  // ----------------------------
   const sidebar = document.getElementById("sidebar");
   const toggle = document.getElementById("sidebarToggle");
   if (toggle && sidebar) {
@@ -13,9 +11,7 @@
     });
   }
 
-  // ----------------------------
   // Carousel arrows
-  // ----------------------------
   const stepSmall = 380 + 16;
   const stepPoster = 110 + 16;
 
@@ -31,9 +27,7 @@
     });
   });
 
-  // ----------------------------
   // Helpers
-  // ----------------------------
   const esc = (s) =>
     String(s ?? "")
       .replaceAll("&", "&amp;")
@@ -53,7 +47,7 @@
     const year = esc(item.year || "");
     const poster = item.poster_url ? esc(item.poster_url) : "";
     const tmdbId = esc(item.tmdb_id);
-    const mediaType = esc(item.media_type || "movie"); // movie/tv
+    const mediaType = esc(item.media_type || "movie"); 
 
     return `
       <a class="card" href="#"
@@ -89,9 +83,7 @@
     `;
   }
 
-  // ----------------------------
-  // Media Modal (Watch / Trailer)
-  // ----------------------------
+  // Media Modal 
   const mediaModal = document.getElementById("mediaModal");
   const mediaBackdrop = document.getElementById("mediaModalBackdrop");
   const mediaClose = document.getElementById("mediaModalClose");
@@ -104,7 +96,6 @@
   const btnWatch = document.getElementById("btnWatch");
   const btnTrailer = document.getElementById("btnTrailer");
 
-  // запоминаем что сейчас открыто (чтобы Watch работал корректно)
   let currentTmdbId = null;
   let currentMediaType = "movie";
 
@@ -179,7 +170,6 @@
     openModal();
 
     try {
-      // твой backend details сам делает movie -> tv fallback, ок
       const data = await fetchJSON(`/api/tmdb/details/${tmdbId}?lang=ru-RU`);
       const title = data.title || titleFallback || "Untitled";
       const year = data.release_date ? String(data.release_date).slice(0, 4) : "";
@@ -210,7 +200,6 @@
     }
   }
 
-  // Клик по карточке -> открываем modal (ВАЖНО: читаем media_type)
   document.addEventListener("click", (e) => {
     const a = e.target.closest("a.card");
     if (!a) return;
@@ -225,9 +214,7 @@
     openMediaDetails(tmdbId, mediaType, titleText);
   });
 
-  // ----------------------------
   // Genres UI
-  // ----------------------------
   const genresGrid = document.getElementById("genresGrid");
   const selected = new Set();
 
@@ -264,9 +251,7 @@
     });
   }
 
-  // ----------------------------
   // Filters
-  // ----------------------------
   const yearSelect = document.getElementById("yearSelect");
   const countrySelect = document.getElementById("countrySelect");
   const btnApply = document.getElementById("btnApply");
@@ -291,7 +276,6 @@
     resultsBlock.classList.add("fadeInUp");
   }
 
-  // Recommendation row: персонально (если бекенд умеет type=movie) + fallback
   async function loadRecommendationRow() {
     if (!mvRecoTrack) return;
 
@@ -301,7 +285,6 @@
       const d = await fetchJSON(`/api/recommendations?limit=12&type=movie`);
       const items = Array.isArray(d.items) ? d.items : [];
 
-      // на всякий случай фильтруем на фронте
       const onlyMovies = items.filter((x) => (x.media_type || "movie") === "movie");
 
       if (onlyMovies.length) {
@@ -350,7 +333,6 @@
 
   if (btnApply) btnApply.onclick = () => loadResults();
 
-  // TOP 30 / TOP 60 -> персональные рекомендации (movie only)
   const top30Btns = document.querySelectorAll("#btnTop30");
   const top60Btns = document.querySelectorAll("#btnTop60");
 
@@ -359,7 +341,6 @@
   
     mvResTrack.innerHTML = `<div class="empty">Loading...</div>`;
   
-    // 1) пробуем персональные рекомендации
     try {
       const data = await fetchJSON(`/api/recommendations?limit=${limit}&type=movie`);
       const items = Array.isArray(data.items) ? data.items : [];
@@ -372,7 +353,6 @@
       console.warn("reco failed -> fallback top", e);
     }
   
-    // 2) fallback: обычный top из TMDB
     try {
       const kind = limit === 60 ? "top60" : "top30";
       const top = await fetchJSON(`/api/movies/top?kind=${kind}&lang=ru-RU`);
@@ -391,9 +371,7 @@
   top30Btns.forEach((b) => b.addEventListener("click", () => loadTop(30)));
   top60Btns.forEach((b) => b.addEventListener("click", () => loadTop(60)));
 
-  // ----------------------------
-  // Topbar: Search / Notif / Profile
-  // ----------------------------
+  // Topbar: Search , Notif ,Profile
   const btnSearch = document.getElementById("btnSearch");
   const btnNotif = document.getElementById("btnNotif");
   const btnProfile = document.getElementById("btnProfile");
@@ -478,9 +456,7 @@
     });
   }
 
-  // ----------------------------
   // Init
-  // ----------------------------
   (async function init() {
     fillYears();
 
@@ -497,7 +473,6 @@
       console.error("reco error", e);
     }
 
-    // initial results (можешь убрать)
     try {
       await loadResults();
     } catch (e) {
