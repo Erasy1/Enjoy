@@ -49,8 +49,7 @@
     const watchNowTrack = document.getElementById("watchNowTrack");
     const planningTrack = document.getElementById("planningTrack");
   
-    // state: planning ids for toggle button
-    const planningSet = new Set(); // key = `${media_type}:${tmdb_id}`
+    const planningSet = new Set(); 
   
     function keyOf(media_type, tmdb_id){
       return `${media_type}:${tmdb_id}`;
@@ -63,7 +62,6 @@
       const mediaType = esc(item.media_type || "movie");
       const progress = Math.max(0, Math.min(100, Number(item.progress || 0)));
   
-      // NOTE: time строку ты хранишь не в DB, поэтому делаем просто progress%
       return `
         <a class="cardWide" href="#"
            data-tmdb-id="${tmdbId}"
@@ -172,7 +170,6 @@
       }
     }
   
-    // Modal (reuse как у тебя)
     const mediaModal = document.getElementById("mediaModal");
     const mediaBackdrop = document.getElementById("mediaModalBackdrop");
     const mediaClose = document.getElementById("mediaModalClose");
@@ -315,7 +312,6 @@
       }
     }
   
-    // click handlers: card + buttons in card
     document.addEventListener("click", async (e) => {
       const actBtn = e.target.closest("button[data-action]");
       if(actBtn){
@@ -358,7 +354,6 @@
       openMediaDetails(tmdbId, mediaType, title, poster);
     });
   
-    // Topbar (search/notif/profile) — копия как у тебя
     const btnSearch = document.getElementById("btnSearch");
     const btnNotif = document.getElementById("btnNotif");
     const btnProfile = document.getElementById("btnProfile");
@@ -423,7 +418,6 @@
       try{
         const d = await fetchJSON(`/api/tmdb/search?q=${encodeURIComponent(query)}&lang=ru-RU`);
         const items = Array.isArray(d.results) ? d.results : [];
-        // simple cards (как в movies): показываем, клики откроют modal (media_type из data-media-type)
         searchResults.innerHTML = items.length ? items.map((it)=>{
           const title = esc(it.title || "Untitled");
           const year = esc(it.year || "");
@@ -452,7 +446,7 @@
       });
     }
   
-    // init
+    
     (async function init(){
       await loadWatchingNow();
       await loadPlanning();
