@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Personalizing recommendations</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --card: rgba(240,240,240,.82);
+      --btn1: #3f53ff;
+      --btn1-hover: #3446d9;
+      --btn2: #1f1fb8;
+      --btn2-hover: #18189a;
+      --text: #1b1b1b;
+    }
+    *{ box-sizing: border-box; }
+    html, body{ height: 100%; }
+    body{ margin:0; font-family:Poppins,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; color:var(--text); }
+
+    .page{
+      min-height: 100vh;
+      display:grid;
+      place-items:center;
+      padding:24px;
+      background:url("{{ url_for('static', filename='bg.jpg') }}") center/cover no-repeat;
+      position:relative;
+      overflow:hidden;
+    }
+    .page::before{ content:""; position:absolute; inset:0; background:rgba(0,0,0,.25); }
+
+    .card{
+      position:relative;
+      width:min(760px,94vw);
+      border-radius:22px;
+      background:var(--card);
+      box-shadow:0 24px 80px rgba(0,0,0,.45);
+      padding:34px 28px 24px;
+      text-align:center;
+    }
+
+    .title{
+      margin:0 0 14px;
+      font-size:22px;
+      font-weight:800;
+      color:#e91e63;
+    }
+
+    .desc{
+      margin:0 auto 22px;
+      max-width:520px;
+      font-weight:700;
+      color:rgba(0,0,0,.65);
+      line-height:1.35;
+    }
+
+    .row{
+      display:flex;
+      gap:18px;
+      justify-content:center;
+      flex-wrap:wrap;
+      margin-top:6px;
+    }
+
+    .btn{
+      min-width:160px;
+      height:44px;
+      border:0;
+      border-radius:999px;
+      color:rgba(255,255,255,.92);
+      font-weight:800;
+      cursor:pointer;
+      transition:transform .15s ease, background .15s ease, box-shadow .15s ease;
+    }
+    .btn-skip{ background:var(--btn1); box-shadow:0 16px 34px rgba(63,83,255,.28); }
+    .btn-skip:hover{ background:var(--btn1-hover); transform:translateY(-1px); }
+
+    .btn-start{ background:var(--btn2); box-shadow:0 16px 34px rgba(31,31,184,.35); }
+    .btn-start:hover{ background:var(--btn2-hover); transform:translateY(-1px); }
+
+    .hint{
+      margin-top:10px;
+      font-size:12px;
+      font-weight:700;
+      color:rgba(0,0,0,.45);
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page">
+    <section class="card" aria-label="Onboarding intro">
+      <h1 class="title">Personalizing recommendations</h1>
+      <p class="desc">
+        Please Answer 10 questions for more comfortable viewing and accurate recommendations.
+      </p>
+
+      <div class="row">
+        <form method="post" action="{{ url_for('onboarding_skip') }}">
+          <button class="btn btn-skip" type="submit">Skip</button>
+        </form>
+
+        <form method="post" action="{{ url_for('onboarding_start') }}">
+          <button class="btn btn-start" type="submit">Start</button>
+        </form>
+      </div>
+
+      <div class="hint">You can fill it out later in the profile.</div>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ENJOY - My List</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pontano+Sans&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='my_list.css') }}">
+</head>
+<body>
+  <div class="layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar" aria-label="Sidebar">
+      <div class="brandRow">
+        <div class="brandBadge" aria-hidden="true"><span class="brandBadgeText">EJ</span></div>
+        <div class="brandText">ENJOY</div>
+      </div>
+
+      <nav class="nav" aria-label="Main navigation">
+        <a class="navItem" href="{{ url_for('dashboard') }}"><span class="navIcon">🏠</span><span class="navLabel">Home</span></a>
+        <a class="navItem" href="{{ url_for('movies_page') }}"><span class="navIcon">🎬</span><span class="navLabel">Movies</span></a>
+        <a class="navItem" href="{{ url_for('series_page') }}"><span class="navIcon">📺</span><span class="navLabel">Series</span></a>
+        <a class="navItem active" href="{{ url_for('my_list_page') }}"><span class="navIcon">🧾</span><span class="navLabel">My list</span></a>
+
+        <div class="navDivider"></div>
+      <!--
+        <a class="navItem" href="#"><span class="navIcon">👥</span><span class="navLabel">Community</span></a>
+        <a class="navItem" href="#"><span class="navIcon">💬</span><span class="navLabel">Social</span></a>
+        <a class="navItem" href="#"><span class="navIcon">🔥</span><span class="navLabel">Trends</span></a>
+      </nav>-->
+
+      <div class="sideBottom">
+        <a href="{{ url_for('settings_page') }}" class="profileMenuItem">⚙️ Settings</a>
+        <a class="sideBtn logout" href="{{ url_for('logout') }}">⎋ <span class="navLabel">Logout</span></a>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <button class="sidebarToggle" id="sidebarToggle" type="button" aria-label="Toggle sidebar">
+          <span></span><span></span>
+        </button>
+
+        <div class="topActions">
+          <button class="topIcon" id="btnSearch" type="button" title="Search">🔍</button>
+          <button class="topIcon" id="btnNotif" type="button" title="Notifications">🔔</button>
+          <button class="profile" id="btnProfile" type="button" title="Profile">
+            <span class="avatar">👤</span>
+            <span class="nick">{{ nickname }}</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- WATCHING NOW -->
+      <section class="block">
+        <div class="blockTop">
+          <div class="sectionTitle">Watching now</div>
+          <div class="arrows">
+            <button class="arrow" type="button" data-target="watchNowTrack" data-dir="-1">❮</button>
+            <button class="arrow" type="button" data-target="watchNowTrack" data-dir="1">❯</button>
+          </div>
+        </div>
+
+        <div class="trackWrap">
+          <div class="track" id="watchNowTrack"></div>
+        </div>
+      </section>
+
+      <!-- PLANNING -->
+      <section class="block" id="planningBlock">
+        <div class="blockTop">
+          <div class="sectionTitle">Planning</div>
+          <div class="arrows">
+            <button class="arrow" type="button" data-target="planningTrack" data-dir="-1">❮</button>
+            <button class="arrow" type="button" data-target="planningTrack" data-dir="1">❯</button>
+          </div>
+        </div>
+
+        <div class="trackWrap">
+          <div class="track" id="planningTrack"></div>
+        </div>
+      </section>
+
+      <!-- Media Modal -->
+      <div class="modal" id="mediaModal" aria-hidden="true">
+        <div class="modalBackdrop" id="mediaModalBackdrop"></div>
+
+        <div class="modalDialog" role="dialog" aria-modal="true" aria-labelledby="mediaModalTitle">
+          <button class="modalClose" id="mediaModalClose" type="button" aria-label="Close">✕</button>
+
+          <div class="modalBody">
+            <div class="modalPoster" id="mediaModalPoster"></div>
+            <div class="modalTrailer hidden" id="mediaModalTrailer"></div>
+
+            <div class="modalText">
+              <div class="modalTitle" id="mediaModalTitle">Loading...</div>
+              <div class="modalMeta" id="mediaModalMeta">—</div>
+              <p class="modalDesc" id="mediaModalDesc">—</p>
+
+              <div class="seriesBtns">
+                <button class="pill" id="btnWatch" type="button">▶ Watch</button>
+                <button class="pill ghost" id="btnTrailer" type="button">🎞 Trailer</button>
+                <button class="pill ghost" id="btnListToggle" type="button">＋ My List</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Search Modal -->
+  <div class="modal" id="searchModal" aria-hidden="true">
+    <div class="modalBackdrop" id="searchBackdrop"></div>
+
+    <div class="modalDialog" role="dialog" aria-modal="true" aria-labelledby="searchTitle">
+      <button class="modalClose" id="searchClose" type="button" aria-label="Close">✕</button>
+
+      <div class="modalBody" style="grid-template-columns: 1fr; gap:12px;">
+        <div class="modalTitle" id="searchTitle">Search</div>
+
+        <input id="searchInput" class="searchInput" type="text"
+               placeholder="Type movie or series..." autocomplete="off" />
+
+        <div class="trackWrap">
+          <div class="track" id="searchResults"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile menu -->
+  <div class="profileMenu" id="profileMenu">
+    <a href="{{ url_for('settings_page') }}" class="profileMenuItem">⚙️ Settings</a>
+    <div class="profileMenuDivider"></div>
+    <a href="{{ url_for('logout') }}" class="profileMenuItem danger">⎋ Logout</a>
+  </div>
+
+  <!-- Notifications Modal -->
+  <div class="modal" id="notifModal" aria-hidden="true">
+    <div class="modalBackdrop" id="notifBackdrop"></div>
+
+    <div class="modalDialog" role="dialog" aria-modal="true" aria-labelledby="notifTitle">
+      <button class="modalClose" id="notifClose" type="button" aria-label="Close">✕</button>
+
+      <div class="modalBody" style="grid-template-columns: 1fr;">
+        <div class="modalTitle" id="notifTitle">Notifications</div>
+        <div class="notifList" id="notifList">
+          <div class="notifItem">No notifications yet (MVP)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='my_list.js') }}"></script>
+</body>
+</html>

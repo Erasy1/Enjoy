@@ -1,0 +1,73 @@
+/* reuse твоих стилей + немного для прогресса */
+
+.track .cardWide{
+    display:grid;
+    grid-template-columns: 220px 1fr;
+    gap: 22px;
+    min-width: 560px;
+    background: rgba(255,255,255,.06);
+    border-radius: 26px;
+    padding: 18px;
+    box-shadow: 0 18px 60px rgba(0,0,0,.35);
+    text-decoration:none;
+    color: rgba(255,255,255,.92);
+  }
+  
+  .cardWide img{
+    width: 220px;
+    height: 220px;
+    object-fit: cover;
+    border-radius: 18px;
+  }
+  
+  .cardWide .title{
+    font-size: 26px;
+    font-weight: 900;
+    color: rgba(120, 235, 255, .9);
+  }
+  
+  .cardWide .subtitle{
+    margin-top: 4px;
+    font-size: 18px;
+    font-weight: 700;
+    opacity: .95;
+  }
+  
+  .cardWide .metaRow{
+    display:flex;
+    align-items:center;
+    gap: 12px;
+    margin-top: 14px;
+  }
+  
+  .badgeBtn{
+    background: rgba(155,90,255,.35);
+    border: 1px solid rgba(155,90,255,.6);
+    color: #fff;
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-weight: 800;
+    cursor:pointer;
+  }
+  
+  .progressWrap{
+    height: 28px;
+    min-width: 180px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.10);
+    overflow:hidden;
+    border: 1px solid rgba(255,255,255,.14);
+  }
+  
+  .progressBar{
+    height:100%;
+    width:0%;
+    background: rgba(155,90,255,.95);
+  }
+  
+  .smallHint{
+    margin-top: 8px;
+    opacity:.8;
+    font-size: 13px;
+  }
+  

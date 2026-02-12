@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --purple: rgba(118, 43, 246, 0.78);
+      --btn: #4a4be2;
+      --btn-hover: #3e3fd1;
+      --stroke: #18d7c7;
+      --text: #1a1a1a;
+      --radius-big: 75px;
+      --radius-card: 22px;
+    }
+
+    *{ box-sizing: border-box; }
+    html, body { height: 100%; }
+    body{
+      margin: 0;
+      font-family: Poppins, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+    }
+
+    .page{
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 28px;
+      background: url("{{ url_for('static', filename='welcome.jpg') }}") center/cover no-repeat;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .page::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background: rgba(0,0,0,.20);
+    }
+
+    .plate{
+      position: relative;
+      width: min(980px, 92vw);
+      min-height: 620px;
+      border-radius: var(--radius-big);
+      background: var(--purple);
+      box-shadow: 0 28px 90px rgba(0,0,0,.45);
+      padding: 56px 36px 46px;
+      display: grid;
+      justify-items: center;
+      align-content: start;
+      gap: 18px;
+      backdrop-filter: blur(2px);
+    }
+
+    .headline{
+      margin: 0 0 6px;
+      font-size: clamp(22px, 3vw, 36px);
+      font-weight: 800;
+      letter-spacing: .02em;
+      color: #081313;
+      text-align: center;
+      text-shadow:
+        -2px -2px 0 var(--stroke),
+         2px -2px 0 var(--stroke),
+        -2px  2px 0 var(--stroke),
+         2px  2px 0 var(--stroke),
+         0px  2px 0 var(--stroke),
+         2px  0px 0 var(--stroke),
+        -2px  0px 0 var(--stroke),
+         0px -2px 0 var(--stroke);
+    }
+
+    .flash{
+      width: min(560px, 92%);
+      padding: 10px 14px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.92);
+      font-weight: 700;
+      text-align: center;
+      box-shadow: 0 12px 26px rgba(0,0,0,.18);
+    }
+
+    .form-card{
+      width: min(560px, 92%);
+      background: rgba(255,255,255,.95);
+      border-radius: var(--radius-card);
+      box-shadow: 0 22px 60px rgba(0,0,0,.25);
+      padding: 26px 28px 22px;
+    }
+
+    .field{ margin-bottom: 16px; }
+
+    .label{
+      display: block;
+      font-size: 14px;
+      font-weight: 700;
+      color: rgba(0,0,0,.55);
+      margin: 0 0 8px;
+    }
+
+    .input{
+      width: 100%;
+      height: 44px;
+      border-radius: 999px;
+      border: 2px solid rgba(0,0,0,.35);
+      padding: 0 18px;
+      font-size: 14px;
+      outline: none;
+      background: #fff;
+    }
+
+    .input::placeholder{
+      color: rgba(0,0,0,.35);
+      font-weight: 600;
+    }
+
+    .input:focus{
+      border-color: rgba(74,75,226,.75);
+      box-shadow: 0 0 0 4px rgba(74,75,226,.18);
+    }
+
+    .btn{
+      width: 100%;
+      height: 48px;
+      border: 0;
+      border-radius: 999px;
+      background: var(--btn);
+      color: rgba(255,255,255,.92);
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .15s ease, background .15s ease, box-shadow .15s ease;
+      box-shadow: 0 16px 30px rgba(74,75,226,.35);
+      margin-top: 6px;
+    }
+
+    .btn:hover{
+      background: var(--btn-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 20px 36px rgba(74,75,226,.45);
+    }
+
+    .link-row{
+      margin-top: 12px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: rgba(255,255,255,.82);
+    }
+
+    .link-row a{
+      color: #ffffff;
+      text-decoration: underline;
+      font-weight: 800;
+    }
+
+    @media (max-width: 520px){
+      .plate{ min-height: auto; padding: 36px 16px 28px; border-radius: 32px; }
+      .form-card{ padding: 20px 16px 16px; border-radius: 18px; }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page">
+    <section class="plate" aria-label="Login plate">
+      <h1 class="headline">Login to your account</h1>
+
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          <div class="flash">{{ messages[0] }}</div>
+        {% endif %}
+      {% endwith %}
+
+      <form class="form-card" action="{{ url_for('login') }}" method="post" autocomplete="on">
+        <div class="field">
+          <label class="label" for="login">Nickname or Email Address</label>
+          <input class="input" id="login" name="login" type="text" placeholder="Your Complate Name or email Address" required />
+        </div>
+
+        <div class="field">
+          <label class="label" for="password">Password</label>
+          <input class="input" id="password" name="password" type="password" placeholder="Your Password" required />
+        </div>
+
+        <button class="btn" type="submit">Login now</button>
+      </form>
+
+      <div class="link-row">
+        No account? <a href="{{ url_for('signup') }}">Sign up</a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

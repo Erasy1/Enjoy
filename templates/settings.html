@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ENJOY - Settings</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pontano+Sans&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='settings.css') }}">
+</head>
+<body>
+  <div class="layout">
+    {% include "partials/sidebar.html" ignore missing %}
+
+    <main class="main">
+      <header class="topbar">
+        <a class="pill" href="{{ url_for('dashboard') }}">← Back</a>
+        <div class="topActions">
+          <div class="nick">{{ nickname }}</div>
+        </div>
+      </header>
+
+      <section class="block settingsBlock">
+        <div class="sectionTitle">Settings</div>
+
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <div class="flashWrap">
+              {% for m in messages %}
+                <div class="flashItem">{{ m }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <!-- Nickname -->
+        <div class="cardForm">
+          <div class="formTitle">Change nickname</div>
+          <form method="post">
+            <input type="hidden" name="form_type" value="nickname" />
+            <input class="input" name="nickname" value="{{ nickname }}" placeholder="New nickname" required />
+            <button class="pill" type="submit">Save</button>
+          </form>
+        </div>
+
+        <!-- Email -->
+        <div class="cardForm">
+          <div class="formTitle">Change email</div>
+          <form method="post">
+            <input type="hidden" name="form_type" value="email" />
+            <input class="input" name="email" value="{{ email }}" placeholder="New email" required />
+            <input class="input" name="password" type="password" placeholder="Current password" required />
+            <button class="pill" type="submit">Save</button>
+          </form>
+        </div>
+
+        <!-- Password -->
+        <div class="cardForm">
+          <div class="formTitle">Change password</div>
+          <form method="post">
+            <input type="hidden" name="form_type" value="password" />
+            <input class="input" name="old_password" type="password" placeholder="Current password" required />
+            <input class="input" name="new_password" type="password" placeholder="New password" required />
+            <input class="input" name="new_password2" type="password" placeholder="Repeat new password" required />
+            <button class="pill" type="submit">Save</button>
+          </form>
+        </div>
+
+      </section>
+    </main>
+  </div>
+</body>
+</html>

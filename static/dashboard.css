@@ -1,0 +1,633 @@
+:root{
+    --bg: rgba(21, 20, 20, 1);
+    --side: rgba(13, 43, 47, 1);
+    --text: rgba(255,255,255,.92);
+    --muted: rgba(255,255,255,.65);
+    --purple: rgba(155, 90, 255, 1);
+    --purple2: rgba(123, 44, 255, 1);
+  }
+  
+  *{ box-sizing:border-box; }
+  html, body{ height:100%; }
+  body{
+    margin:0;
+    font-family: "Pontano Sans", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+  
+  .layout{
+    height:100vh;
+    display:flex;
+    overflow:hidden;
+  }
+  
+  /* SIDEBAR */
+  .sidebar{
+    width: 260px;
+    background: var(--side);
+    padding: 18px 16px;
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+    transition: width .18s ease;
+  }
+  .sidebar.closed{
+    width: 86px;
+  }
+  
+  .brandRow{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding: 8px;
+  }
+  
+  .brandRow{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding: 8px;
+  }
+  
+  .brandBadge{
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+  
+    /* вот та самая "тень/плашка" */
+    background: rgba(0,0,0,.18);
+    box-shadow:
+      0 10px 30px rgba(0,0,0,.45),
+      inset 0 1px 0 rgba(184, 16, 178, 0.08);
+  
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  
+    border: 1px solid rgba(195, 26, 161, 0.06);
+  }
+  
+  .brandBadgeText{
+    font-weight: 900;
+    letter-spacing: .12em;
+    color: rgba(121, 23, 23, 0.85);
+    font-size: 14px;
+  }
+  
+  /* когда sidebar закрыт — плашка остаётся, текст ENJOY скрывается */
+  .sidebar.closed .brandText{ display:none; }
+  
+  
+  .brandText{
+    flex: 1;
+    text-align: center;        /* ENJOY по центру блока */
+    font-weight: 700;
+    letter-spacing: .14em;
+    font-size: 18px;
+  }
+  
+  .sidebar.closed .brandText{ display:none; }
+  
+  .nav{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    padding: 0 5px;
+  }
+  
+  .navItem{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding: 10px 10px;
+    border-radius: 12px;
+    text-decoration:none;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .navItem:hover{
+    background: rgba(255,255,255,.06);
+    color: var(--text);
+  }
+  .navItem.active{
+    background: rgba(155, 90, 255, .20);
+    color: var(--text);
+  }
+  
+  .navIcon{ width: 20px; text-align:center; }
+  
+  .sidebar.closed .navLabel{ display:none; }
+  
+  .navDivider{
+    height: 1px;
+    background: rgba(255,255,255,.14);
+    margin: 10px 0;
+  }
+  
+  .sideBottom{
+    margin-top:auto;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    padding: 0 6px;
+  }
+  
+  .sideBtn{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding: 10px 10px;
+    border-radius: 12px;
+    background: rgba(255,255,255,.05);
+    border:0;
+    color: var(--text);
+    cursor:pointer;
+    text-decoration:none;
+    font-weight: 700;
+  }
+  .sideBtn:hover{ background: rgba(255,255,255,.08); }
+  .sideBtn.logout{ background: rgba(255,0,0,.10); }
+  
+  /* MAIN */
+  .main{
+    flex:1;
+    padding: 16px 22px;
+    overflow:auto;
+  }
+  
+  /* TOPBAR */
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 16px;
+    margin-bottom: 10px;
+  }
+  
+  .sidebarToggle{
+    width: 40px;
+    height: 40px;
+    border:0;
+    background: rgba(155, 90, 255, .10);   /* фон кнопки */
+    border-radius: 12px;
+    cursor:pointer;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    gap:6px;
+  
+    transition: background .15s ease;
+  }
+  
+  .sidebarToggle:hover{
+    background: rgba(155, 90, 255, .18);
+  }
+  
+  .sidebarToggle span{
+    height:3px;
+    width:22px;
+    border-radius:999px;
+  
+    background: var(--purple);            /* цвет полосок */
+    transition: background .15s ease;
+  }
+  
+  
+  .topActions{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  
+  .topIcon{
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    border:0;
+    cursor:pointer;
+    background: rgba(255,255,255,.07);
+    color: var(--text);
+    font-size: 16px;
+  }
+  .topIcon:hover{ background: rgba(255,255,255,.12); }
+  
+  .profile{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    border:0;
+    background: transparent;
+    cursor:pointer;
+    color: var(--text);
+    font-weight: 700;
+  }
+  .avatar{
+    width: 28px;
+    height: 28px;
+    border-radius: 10px;
+    background: rgba(255,255,255,.08);
+    display:grid;
+    place-items:center;
+  }
+  .nick{ opacity: .9; }
+  
+  /* HERO */
+  .hero{
+    display:grid;
+    grid-template-columns: minmax(600px, 1fr) minmax(420px, 520px);
+    gap: 32px;
+    align-items: center; /* было start — из-за этого блок “прилипает” вверх */
+  }
+
+  .sectionTitle{
+    font-size: 18px;
+    font-weight: 700;
+    color: rgba(170, 90, 255, .95);
+    margin: 6px 0 10px;
+  }
+  .sectionTitle.right{ margin-top: 34px; }
+  
+  /* Releases cards: 600x300 */
+.trackReleases .releaseCard{
+    flex: 0 0 auto;
+    width: 600px;
+    height: 300px;
+    border-radius: 24px;
+    overflow: hidden;
+    position: relative;
+  }
+  
+  .trackReleases .releaseCard img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  
+  .trackReleases .releaseCard span{
+    position: absolute;
+    left: 22px;
+    bottom: 18px;
+    font-size: 22px;
+    font-weight: 600;
+    text-shadow: 0 6px 18px rgba(0,0,0,.55);
+  }
+  
+  /* active highlight */
+  .trackReleases .releaseCard.active{
+    outline: 2px solid rgba(155, 90, 255, 1);
+    outline-offset: 3px;
+  }
+  
+  .releaseCard{
+    width: 600px;        /* строго */
+    height: 300px;       /* строго */
+    max-width: 100%;
+    border-radius: 28px;
+    overflow:hidden;
+    position:relative;
+    background: rgba(255,255,255,.06);
+    box-shadow: 0 20px 60px rgba(0,0,0,.45);
+  }
+  .releaseCard img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+  .releaseText{
+    position:absolute;
+    left: 0; right: 0; bottom: 0; top: 0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight: 800;
+    font-size: 20px;
+    text-shadow: 0 12px 28px rgba(0,0,0,.7);
+    background: linear-gradient(90deg, rgba(0,0,0,.35), rgba(0,0,0,.08));
+  }
+  
+  .heroRight{
+    padding-top: 0;
+  }
+  
+  .seriesName{
+    font-weight: 900;
+    font-size: 16px;
+    margin-bottom: 6px;
+  }
+  .seriesMeta{
+    color: rgba(255,255,255,.70);
+    font-weight: 600;
+    font-size: 12px;
+    margin-bottom: 10px;
+  }
+  .seriesDesc{
+    color: rgba(255,255,255,.68);
+    font-size: 12px;
+    line-height: 1.45;
+    margin: 0 0 14px;
+  }
+  .seriesBtns{
+    display:flex;
+    gap:10px;
+  }
+  .pill{
+    height: 34px;
+    padding: 0 16px;
+    border-radius: 999px;
+    border:0;
+    cursor:pointer;
+    font-weight: 800;
+    color: rgba(255,255,255,.92);
+    background: rgba(123, 44, 255, .60);
+  }
+  .pill:hover{ background: rgba(123, 44, 255, .75); }
+  .pill.ghost{
+    background: rgba(123, 44, 255, .30);
+  }
+  .pill.ghost:hover{
+    background: rgba(123, 44, 255, .45);
+  }
+  
+  /* CAROUSELS */
+  .block{
+    margin-top: 22px;
+  }
+  
+  .blockHeader{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:14px;
+    margin-bottom: 10px;
+  }
+  
+  .arrows{
+    display:flex;
+    gap:8px;
+  }
+  
+  .arrow{
+    width: 26px;
+    height: 26px;
+    border-radius: 999px;
+    border:0;
+    cursor:pointer;
+    background: rgba(123, 44, 255, .55);
+    color: rgba(255,255,255,.95);
+    font-weight: 900;
+  }
+  .arrow:hover{ background: rgba(123, 44, 255, .75); }
+  
+  .trackWrap{
+    overflow:hidden;
+  }
+  
+  .track{
+    display:flex;
+    gap:16px;
+    overflow:auto;
+    scroll-behavior:smooth;
+    padding-bottom: 6px;
+  }
+  .track::-webkit-scrollbar{ height:8px; }
+  .track::-webkit-scrollbar-thumb{ background: rgba(255,255,255,.12); border-radius:999px; }
+  
+  .card{
+    width: 380px;     /* строго */
+    height: 220px;    /* строго */
+    flex: 0 0 auto;
+    border-radius: 22px;
+    overflow:hidden;
+    position:relative;
+    background: rgba(255,255,255,.06);
+    box-shadow: 0 18px 50px rgba(0,0,0,.40);
+    text-decoration:none;
+    color: var(--text);
+  }
+  .card img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+  .card span{
+    position:absolute;
+    left: 18px;
+    bottom: 16px;
+    font-weight: 900;
+    text-shadow: 0 12px 28px rgba(0,0,0,.7);
+  }
+  
+  @media (max-width: 1100px){
+    .hero{ grid-template-columns: 1fr; }
+    .sectionTitle.right{ margin-top: 10px; }
+  }
+  
+  /*  Modal */
+.modal{
+    position: fixed;
+    inset: 0;
+    display: none;
+    z-index: 9999;
+  }
+  .modal.open{ display: block; }
+  
+  .modalBackdrop{
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,.6);
+    backdrop-filter: blur(3px);
+  }
+  
+  .modalDialog{
+    position: relative;
+    width: min(920px, calc(100% - 32px));
+    margin: 80px auto 0;
+    background: rgba(13, 43, 47, 0.92);
+    border-radius: 24px;
+    box-shadow: 0 20px 80px rgba(0,0,0,.55);
+    overflow: hidden;
+  }
+  
+  .modalClose{
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,.2);
+    background: rgba(0,0,0,.25);
+    color: rgba(255,255,255,.92);
+    cursor: pointer;
+  }
+  
+  .modalBody{
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 18px;
+    padding: 18px;
+  }
+  
+  .modalPoster{
+    width: 240px;
+    height: 360px;
+    border-radius: 18px;
+    overflow: hidden;
+    background: rgba(0,0,0,.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .modalPoster img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  
+  .modalTitle{
+    font-size: 26px;
+    font-weight: 700;
+    margin-top: 4px;
+  }
+  
+  .modalMeta{
+    margin-top: 6px;
+    color: rgba(255,255,255,.7);
+    font-size: 14px;
+  }
+  
+  .modalDesc{
+    margin-top: 12px;
+    color: rgba(255,255,255,.85);
+    line-height: 1.35;
+  }
+  
+  /* mobile */
+  @media (max-width: 700px){
+    .modalBody{ grid-template-columns: 1fr; }
+    .modalPoster{ width: 100%; height: 320px; }
+  }
+  
+/* Trailer inside modal */
+.modalTrailer{
+    width: 100%;
+    height: 360px;
+    border-radius: 18px;
+    overflow: hidden;
+    background: rgba(0,0,0,.25);
+  }
+  
+  .modalTrailer iframe{
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+  }
+  
+  .hidden{ display: none !important; }
+  
+  /* на мобилке чтобы норм выглядело */
+  @media (max-width: 700px){
+    .modalTrailer{ height: 320px; }
+  }
+
+  .cwBar{
+    position:absolute;
+    left: 14px;
+    right: 14px;
+    bottom: 10px;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.14);
+    overflow:hidden;
+  }
+  .cwFill{
+    height: 100%;
+    width: 0%;
+    background: rgba(155,90,255,1);
+  }
+  
+  /* Prevent horizontal scroll due to grid/flex min-width */
+.heroLeft, .heroRight, .trackWrap, .track, .main {
+  min-width: 0;
+}
+
+/* Fix hero width (avoid forced 600px + 420px on small screens) */
+.hero{
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 520px);
+}
+
+/* Optional: if you still get horizontal scroll */
+html, body{
+  overflow-x: hidden;
+}
+
+/* Search input */
+.searchInput{
+  width: 100%;
+  height: 42px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.18);
+  background: rgba(0,0,0,.25);
+  color: rgba(255,255,255,.92);
+  padding: 0 14px;
+  outline: none;
+}
+.searchInput:focus{
+  border-color: rgba(155, 90, 255, .9);
+}
+
+/* Profile menu (dropdown) */
+.profileMenu{
+  position: fixed;
+  top: 64px;
+  right: 22px;
+  width: 240px;
+  background: rgba(13, 43, 47, 0.96);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 16px;
+  box-shadow: 0 20px 70px rgba(0,0,0,.55);
+  padding: 8px;
+  display: none;
+  z-index: 10000;
+}
+.profileMenu.open{ display:block; }
+
+.profileMenuItem{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  padding: 10px 12px;
+  border-radius: 12px;
+  color: rgba(255,255,255,.9);
+  text-decoration:none;
+  font-weight: 700;
+}
+.profileMenuItem:hover{
+  background: rgba(255,255,255,.06);
+}
+.profileMenuDivider{
+  height: 1px;
+  background: rgba(255,255,255,.14);
+  margin: 6px 0;
+}
+.profileMenuItem.danger{
+  color: rgba(255,120,120,1);
+}
+
+/* Notifications list */
+.notifList{ display:flex; flex-direction:column; gap:10px; }
+.notifItem{
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.06);
+  color: rgba(255,255,255,.85);
+}
+

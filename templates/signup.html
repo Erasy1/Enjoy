@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create an account</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --purple: rgba(118, 43, 246, 0.78);
+      --stroke: #18d7c7;
+
+      --btn-primary: #4a4be2;
+      --btn-primary-hover: #3e3fd1;
+
+      --card-radius: 22px;
+      --plate-radius: 54px;
+
+      --text: #1a1a1a;
+      --muted: rgba(0,0,0,.55);
+    }
+
+    *{ box-sizing: border-box; }
+    html, body{ height: 100%; }
+    body{
+      margin: 0;
+      font-family: Poppins, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+    }
+
+    .page{
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 28px;
+      background: url("{{ url_for('static', filename='welcome.jpg') }}") center/cover no-repeat;
+      position: relative;
+      overflow: hidden;
+    }
+    .page::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background: rgba(0,0,0,.20);
+    }
+
+    .plate{
+      position: relative;
+      width: min(980px, 92vw);
+      min-height: 660px;
+      border-radius: var(--plate-radius);
+      background: var(--purple);
+      box-shadow: 0 28px 90px rgba(0,0,0,.45);
+      padding: 48px 36px 40px;
+      display: grid;
+      justify-items: center;
+      align-content: start;
+      gap: 18px;
+      backdrop-filter: blur(2px);
+    }
+
+    .headline{
+      margin: 0 0 4px;
+      font-size: clamp(22px, 3vw, 36px);
+      font-weight: 800;
+      color: #081313;
+      text-align: center;
+      text-shadow:
+        -2px -2px 0 var(--stroke),
+         2px -2px 0 var(--stroke),
+        -2px  2px 0 var(--stroke),
+         2px  2px 0 var(--stroke),
+         0px  2px 0 var(--stroke),
+         2px  0px 0 var(--stroke),
+        -2px  0px 0 var(--stroke),
+         0px -2px 0 var(--stroke);
+    }
+
+    .flash{
+      width: min(560px, 92%);
+      padding: 10px 14px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.92);
+      font-weight: 700;
+      text-align: center;
+      box-shadow: 0 12px 26px rgba(0,0,0,.18);
+    }
+
+    .social-row{
+      width: min(560px, 92%);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 6px;
+    }
+
+    .social-btn{
+      height: 40px;
+      border-radius: 8px;
+      border: 0;
+      background: rgba(255,255,255,.92);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 10px 22px rgba(0,0,0,.18);
+      transition: transform .15s ease, box-shadow .15s ease;
+    }
+    .social-btn:hover{
+      transform: translateY(-1px);
+      box-shadow: 0 14px 26px rgba(0,0,0,.22);
+    }
+    .social-btn:active{
+      transform: translateY(0px);
+      box-shadow: 0 8px 18px rgba(0,0,0,.18);
+    }
+
+    .icon{
+      width: 18px;
+      height: 18px;
+      display: inline-block;
+    }
+
+    .or{
+      margin: 2px 0 6px;
+      font-size: 13px;
+      font-weight: 700;
+      color: rgba(255,255,255,.70);
+      letter-spacing: .04em;
+    }
+
+    .form-card{
+      width: min(560px, 92%);
+      background: rgba(255,255,255,.95);
+      border-radius: var(--card-radius);
+      box-shadow: 0 22px 60px rgba(0,0,0,.25);
+      padding: 22px 26px 20px;
+    }
+
+    .field{ margin-bottom: 14px; }
+
+    .label{
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      color: rgba(0,0,0,.55);
+      margin: 0 0 8px;
+    }
+
+    .input{
+      width: 100%;
+      height: 44px;
+      border-radius: 999px;
+      border: 2px solid rgba(0,0,0,.35);
+      padding: 0 18px;
+      font-size: 14px;
+      outline: none;
+      background: #fff;
+    }
+    .input::placeholder{
+      color: rgba(0,0,0,.35);
+      font-weight: 600;
+    }
+    .input:focus{
+      border-color: rgba(74,75,226,.75);
+      box-shadow: 0 0 0 4px rgba(74,75,226,.18);
+    }
+
+    .primary-btn{
+      width: 100%;
+      height: 48px;
+      border: 0;
+      border-radius: 999px;
+      background: var(--btn-primary);
+      color: rgba(255,255,255,.92);
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform .15s ease, background .15s ease, box-shadow .15s ease;
+      box-shadow: 0 16px 30px rgba(74,75,226,.35);
+      margin-top: 6px;
+    }
+    .primary-btn:hover{
+      background: var(--btn-primary-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 20px 36px rgba(74,75,226,.45);
+    }
+    .primary-btn:active{
+      transform: translateY(0);
+      box-shadow: 0 12px 26px rgba(74,75,226,.35);
+    }
+
+    .link-row{
+      margin-top: 12px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: rgba(255,255,255,.82);
+    }
+    .link-row a{
+      color: #ffffff;
+      text-decoration: underline;
+      font-weight: 800;
+    }
+
+    @media (max-width: 560px){
+      .plate{
+        min-height: auto;
+        padding: 34px 16px 26px;
+        border-radius: 32px;
+      }
+      .social-row{
+        grid-template-columns: 1fr;
+      }
+      .form-card{
+        padding: 18px 14px 14px;
+        border-radius: 18px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page">
+    <section class="plate" aria-label="Create account plate">
+      <h1 class="headline">Create an account</h1>
+
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          <div class="flash">{{ messages[0] }}</div>
+        {% endif %}
+      {% endwith %}
+
+      <div class="social-row" aria-label="Social sign up">
+        <button class="social-btn" type="button">
+          <svg class="icon" viewBox="0 0 48 48" aria-hidden="true">
+            <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.7 1.1 7.8 2.9l5.7-5.7C34.6 6.1 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.1-.1-2.2-.4-3.5z"/>
+            <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.3 19 12 24 12c3 0 5.7 1.1 7.8 2.9l5.7-5.7C34.6 6.1 29.6 4 24 4 16.3 4 9.6 8.3 6.3 14.7z"/>
+            <path fill="#4CAF50" d="M24 44c5.2 0 10-2 13.6-5.2l-6.3-5.2C29.3 35.8 26.8 36 24 36c-5.3 0-9.8-3.4-11.4-8.1l-6.5 5C9.3 39.7 16.1 44 24 44z"/>
+            <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-1.1 3-3.3 5.3-6 6.6l6.3 5.2C39.9 36 44 30.6 44 24c0-1.1-.1-2.2-.4-3.5z"/>
+          </svg>
+          Google
+        </button>
+
+        <button class="social-btn" type="button">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="#1877F2" d="M24 12.1C24 5.4 18.6 0 12 0S0 5.4 0 12.1C0 18.1 4.4 23 10.1 24v-8.4H7.1v-3.5h3V9.4c0-3 1.8-4.7 4.5-4.7 1.3 0 2.7.2 2.7.2v3h-1.5c-1.5 0-2 .9-2 1.8v2.2h3.4l-.5 3.5h-2.9V24C19.6 23 24 18.1 24 12.1z"/>
+          </svg>
+          Facebook
+        </button>
+      </div>
+
+      <div class="or">Or</div>
+
+      <form class="form-card" action="{{ url_for('signup') }}" method="post" autocomplete="on">
+        <div class="field">
+          <label class="label" for="nickname">Nickname</label>
+          <input class="input" id="nickname" name="nickname" type="text" placeholder="Your Complate Name" required />
+        </div>
+
+        <div class="field">
+          <label class="label" for="email">Email Address</label>
+          <input class="input" id="email" name="email" type="email" placeholder="Your email address" required />
+        </div>
+
+        <div class="field">
+          <label class="label" for="password">Password</label>
+          <input class="input" id="password" name="password" type="password" placeholder="Your Password" required />
+        </div>
+
+        <button class="primary-btn" type="submit">Continue</button>
+      </form>
+
+      <div class="link-row">
+        Already have an account? <a href="{{ url_for('login') }}">Log in</a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

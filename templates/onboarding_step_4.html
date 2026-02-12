@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Onboarding - Q4</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --card: rgba(240,240,240,.82);
+      --chip: #7b1fa2;
+      --chip-active: #9c27b0;
+      --back: #3f53ff;
+      --back-hover: #3446d9;
+      --next: #1f1fb8;
+      --next-hover: #18189a;
+      --text: #1b1b1b;
+      --warn: rgba(0,0,0,.65);
+    }
+    *{ box-sizing: border-box; }
+    html, body{ height: 100%; }
+    body{
+      margin: 0;
+      font-family: Poppins, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+    }
+
+    .page{
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: url("{{ url_for('static', filename='welcome.jpg') }}") center/cover no-repeat;
+      position: relative;
+      overflow: hidden;
+    }
+    .page::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background: rgba(0,0,0,.25);
+    }
+
+    .card{
+      position: relative;
+      width: min(900px, 94vw);
+      border-radius: 22px;
+      background: var(--card);
+      box-shadow: 0 24px 80px rgba(0,0,0,.45);
+      padding: 28px 30px 22px;
+    }
+
+    .top{
+      display: grid;
+      justify-items: center;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+
+    .qcount{
+      font-weight: 700;
+      font-size: 20px;
+      color: rgba(0,0,0,.75);
+    }
+
+    .progress{
+      width: min(360px, 70%);
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(0,0,0,.12);
+      position: relative;
+      overflow: hidden;
+    }
+    .progress > span{
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 40%;          /* 4 из 10 */
+      background: #e91e63;
+      border-radius: 999px;
+    }
+
+    .question{
+      text-align: center;
+      font-size: clamp(18px, 2.4vw, 24px);
+      font-weight: 700;
+      margin: 10px 0 18px;
+      color: rgba(0,0,0,.75);
+    }
+
+    .grid{
+      display: grid;
+      grid-template-columns: repeat(3, minmax(150px, 1fr));
+      gap: 16px 18px;
+      justify-items: center;
+      max-width: 620px;
+      margin: 0 auto 14px;
+    }
+
+    input[type="checkbox"]{ display:none; }
+
+    .chip{
+      width: 100%;
+      height: 44px;
+      border-radius: 999px;
+      background: var(--chip);
+      color: rgba(255,255,255,.92);
+      font-weight: 800;
+      border: 2px solid rgba(255,255,255,.0);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform .15s ease, background .15s ease, box-shadow .15s ease;
+      box-shadow: 0 14px 28px rgba(123,31,162,.28);
+      user-select: none;
+      text-align: center;
+      padding: 0 18px;
+    }
+    .chip:hover{
+      transform: translateY(-1px);
+      background: var(--chip-active);
+      box-shadow: 0 18px 34px rgba(123,31,162,.34);
+    }
+    input[type="checkbox"]:checked + label.chip{
+      background: var(--chip-active);
+      box-shadow: 0 18px 36px rgba(123,31,162,.42);
+      border-color: rgba(255,255,255,.28);
+    }
+
+    .other-wrap{
+      max-width: 620px;
+      margin: 0 auto 6px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      justify-items: center;
+    }
+
+    .other-input{
+      width: min(360px, 92%);
+      height: 44px;
+      border-radius: 999px;
+      border: 2px solid rgba(0,0,0,.30);
+      padding: 0 16px;
+      font-weight: 700;
+      outline: none;
+      display: none; /* показываем если выбран other */
+      background: rgba(255,255,255,.92);
+    }
+    .other-input:focus{
+      border-color: rgba(74,75,226,.75);
+      box-shadow: 0 0 0 4px rgba(74,75,226,.18);
+    }
+
+    .error{
+      max-width: 620px;
+      margin: 10px auto 0;
+      text-align: center;
+      font-weight: 800;
+      color: var(--warn);
+      display: none;
+    }
+
+    .footer{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      margin-top: 14px;
+    }
+
+    .btn{
+      min-width: 140px;
+      height: 44px;
+      border: 0;
+      border-radius: 999px;
+      color: rgba(255,255,255,.92);
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform .15s ease, background .15s ease, box-shadow .15s ease;
+    }
+
+    .btn-back{
+      background: var(--back);
+      box-shadow: 0 16px 34px rgba(63,83,255,.28);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-back:hover{ background: var(--back-hover); transform: translateY(-1px); }
+
+    .btn-next{
+      background: var(--next);
+      box-shadow: 0 16px 34px rgba(31,31,184,.35);
+    }
+    .btn-next:hover{ background: var(--next-hover); transform: translateY(-1px); }
+
+    @media (max-width: 720px){
+      .grid{ grid-template-columns: repeat(2, minmax(140px, 1fr)); }
+    }
+    @media (max-width: 520px){
+      .card{ padding: 20px 16px 16px; }
+      .grid{ grid-template-columns: 1fr; }
+      .footer{ flex-direction: column; }
+      .btn{ width: 100%; }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page">
+    <section class="card" aria-label="Onboarding question 4">
+      <div class="top">
+        <div class="qcount">Question 4 of 10</div>
+        <div class="progress" aria-label="Progress"><span></span></div>
+      </div>
+
+      <div class="question">Choose 3–5 genres that you like</div>
+
+      <form id="q4form" method="post" action="{{ url_for('onboarding_step', step=4) }}">
+        <div class="grid" aria-label="Genres">
+          <input id="g_action" type="checkbox" name="genres" value="action">
+          <label class="chip" for="g_action">Action</label>
+
+          <input id="g_comedy" type="checkbox" name="genres" value="comedy">
+          <label class="chip" for="g_comedy">Comedy</label>
+
+          <input id="g_drama" type="checkbox" name="genres" value="drama">
+          <label class="chip" for="g_drama">Drama</label>
+
+          <input id="g_thriller" type="checkbox" name="genres" value="thriller">
+          <label class="chip" for="g_thriller">Thriller</label>
+
+          <input id="g_dubbing" type="checkbox" name="genres" value="dubbing">
+          <label class="chip" for="g_dubbing">Dubbing</label>
+
+          <input id="g_detective" type="checkbox" name="genres" value="detective">
+          <label class="chip" for="g_detective">Detective</label>
+
+          <input id="g_horror" type="checkbox" name="genres" value="horror">
+          <label class="chip" for="g_horror">Horror</label>
+
+          <input id="g_fantasy" type="checkbox" name="genres" value="fantasy">
+          <label class="chip" for="g_fantasy">Fantasy</label>
+
+          <input id="g_romance" type="checkbox" name="genres" value="romance">
+          <label class="chip" for="g_romance">Romance</label>
+
+          <input id="g_documentary" type="checkbox" name="genres" value="documentary">
+          <label class="chip" for="g_documentary">Documentary</label>
+        </div>
+
+        <div class="other-wrap">
+          <div style="width:min(260px,92%);">
+            <input id="g_other" type="checkbox" name="genres" value="other">
+            <label class="chip" for="g_other">Other:</label>
+          </div>
+
+          <input class="other-input" id="other_text" name="other_text" type="text" placeholder="Type genre..." />
+        </div>
+
+        <div class="error" id="err">Please choose from 3 to 5 genres.</div>
+
+        <div class="footer">
+          <a class="btn btn-back" href="{{ url_for('onboarding_step', step=3) }}">Back</a>
+          <button class="btn btn-next" type="submit">Next</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    const form = document.getElementById('q4form');
+    const err = document.getElementById('err');
+
+    const otherCheck = document.getElementById('g_other');
+    const otherInput = document.getElementById('other_text');
+
+    function syncOther(){
+      const on = otherCheck.checked;
+      otherInput.style.display = on ? 'block' : 'none';
+      if (!on) otherInput.value = '';
+    }
+    otherCheck.addEventListener('change', syncOther);
+    syncOther();
+
+    form.addEventListener('submit', (e) => {
+      const checked = form.querySelectorAll('input[name="genres"]:checked').length;
+      if (checked < 3 || checked > 5){
+        e.preventDefault();
+        err.style.display = 'block';
+      } else {
+        err.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>

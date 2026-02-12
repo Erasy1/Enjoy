@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ENJOY - Watch</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pontano+Sans&display=swap" rel="stylesheet">
+  <style>
+    body{
+      margin:0;
+      font-family:"Pontano Sans",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background: rgba(21,20,20,1);
+      color: rgba(255,255,255,.92);
+      padding: 24px;
+    }
+    .box{
+      max-width: 920px;
+      margin: 0 auto;
+      background: rgba(13,43,47,1);
+      border-radius: 18px;
+      padding: 18px;
+    }
+    .row{ display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+    .btn{
+      height: 36px; padding:0 14px; border-radius: 999px; border:0;
+      cursor:pointer; font-weight:800;
+      background: rgba(123,44,255,.6); color: rgba(255,255,255,.92);
+    }
+    .btn.ghost{ background: rgba(123,44,255,.28); }
+    .bar{ height: 10px; background: rgba(255,255,255,.12); border-radius: 999px; overflow:hidden; margin: 10px 0 6px; }
+    .fill{ height: 100%; width: 0%; background: rgba(155,90,255,1); }
+    a{ color: rgba(155,90,255,1); text-decoration:none; }
+    .muted{ color: rgba(255,255,255,.72); }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2>Watch </h2>
+    <p class="muted">
+      Это только логика для раздела Continue Watching
+    </p>
+
+    <p><b>Type:</b> <span id="mediaType">{{ media_type }}</span></p>
+    <p><b>TMDB ID:</b> <span id="tmdbId">{{ tmdb_id }}</span></p>
+    <p><b>Title:</b> <span id="title">Loading...</span></p>
+
+    <div class="bar"><div class="fill" id="fill"></div></div>
+    <div class="muted">Progress: <span id="progressText">0</span>%</div>
+
+    <div class="row" style="margin-top:12px">
+      <button class="btn ghost" id="minus10">-10%</button>
+      <button class="btn" id="plus10">+10%</button>
+      <button class="btn" id="finish">Finish</button>
+      <a href="/dashboard" class="btn ghost" style="display:inline-flex;align-items:center;">← Dashboard</a>
+    </div>
+  </div>
+
+<script>
+(async function(){
+  const tmdbId = parseInt(document.getElementById("tmdbId").textContent, 10);
+  const mediaType = document.getElementById("mediaType").textContent.trim();
+
+  const titleEl = document.getElementById("title");
+  const fill = document.getElementById("fill");
+  const progressText = document.getElementById("progressText");
+
+  let progress = 0;
+  let posterUrl = null;
+  let title = "";
+
+  async function fetchJSON(url){
+    const r = await fetch(url, { headers: { "Accept": "application/json" } });
+    if(!r.ok) throw new Error("HTTP " + r.status);
+    return r.json();
+  }
+
+  async function postJSON(url, payload){
+    const r = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    if(!r.ok) throw new Error("HTTP " + r.status);
+    return r.json();
+  }
+  try{
+    const s = await fetchJSON(`/api/watch/status/${mediaType}/${tmdbId}`);
+    if (s && typeof s.progress === "number") progress = s.progress;
+  }catch(e){}
+  applyUI();  
+
+  function applyUI(){
+    fill.style.width = progress + "%";
+    progressText.textContent = String(progress);
+  }
+
+  try{
+    const d = await fetchJSON(`/api/tmdb/details/${tmdbId}?lang=ru-RU`);
+    title = d.title || `tmdb:${tmdbId}`;
+    posterUrl = d.poster_url || null;
+    titleEl.textContent = title;
+  }catch(e){
+    titleEl.textContent = `tmdb:${tmdbId}`;
+  }
+
+  // start watching save to DB
+  try{
+    await postJSON("/api/watch/start", {
+      tmdb_id: tmdbId,
+      media_type: mediaType,
+      title: title,
+      poster_url: posterUrl
+    });
+  }catch(e){ console.error(e); }
+
+  async function setProgress(p){
+    progress = Math.max(0, Math.min(100, p));
+    applyUI();
+    try{
+      await postJSON("/api/watch/progress", {
+        tmdb_id: tmdbId,
+        media_type: mediaType,
+        progress: progress
+      });
+    }catch(e){ console.error(e); }
+  }
+
+  document.getElementById("minus10").onclick = () => setProgress(progress - 10);
+  document.getElementById("plus10").onclick  = () => setProgress(progress + 10);
+  document.getElementById("finish").onclick = async () => {
+    await setProgress(100);
+    window.location.href = "/dashboard";
+};
+
+applyUI();
+
+
+  applyUI();
+})();
+</script>
+</body>
+</html>
