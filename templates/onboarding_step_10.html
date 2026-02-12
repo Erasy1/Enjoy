@@ -322,7 +322,6 @@
         <div id="pills" style="display:flex; gap:10px; flex-wrap:wrap;"></div>
       </div>
 
-      <!-- Finish submits POST to /onboarding/step/10 (server checks >=5 liked) -->
       <form id="finishForm" method="post" action="{{ url_for('onboarding_step', step=10) }}">
         <div class="footer">
           <a class="btn btn-back" href="{{ url_for('onboarding_step', step=9) }}">Back</a>
@@ -342,8 +341,6 @@
     const finishBtn = document.getElementById('finishBtn');
     const searchBtn = document.getElementById('searchBtn');
 
-    // in-memory liked list (sync with backend)
-    // items: {tmdb_id, media_type, title}
     let liked = [];
 
     function escapeHtml(s){
@@ -362,14 +359,11 @@
         </span>
       `).join('');
 
-      // bind pill delete
       pillsEl.querySelectorAll('button[data-del]').forEach(btn => {
         btn.addEventListener('click', async () => {
           const tmdbId = btn.getAttribute('data-del');
           await fetch(`/api/onboarding/title/${tmdbId}`, { method: 'DELETE' });
           await loadSelected();
-          // optional: refresh results buttons
-          // (not mandatory)
         });
       });
     }
@@ -446,7 +440,6 @@
       renderResults(data.results || []);
     }
 
-    // UX: enter triggers search
     qEl.addEventListener('keydown', (e) => {
       if(e.key === 'Enter'){
         e.preventDefault();
@@ -456,7 +449,6 @@
 
     searchBtn.addEventListener('click', doSearch);
 
-    // first load
     loadSelected();
     listEl.innerHTML = `<div class="row"><div></div><div class="title">Search and add titles you like</div><div></div></div>`;
   </script>
