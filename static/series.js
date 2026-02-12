@@ -1,9 +1,7 @@
 (function () {
   "use strict";
 
-  // ----------------------------
   // Sidebar toggle
-  // ----------------------------
   const sidebar = document.getElementById("sidebar");
   const toggle = document.getElementById("sidebarToggle");
   if (toggle && sidebar) {
@@ -13,9 +11,7 @@
     });
   }
 
-  // ----------------------------
   // Carousel arrows
-  // ----------------------------
   const stepSmall = 380 + 16;
   const stepPoster = 110 + 16;
 
@@ -31,9 +27,7 @@
     });
   });
 
-  // ----------------------------
   // Helpers
-  // ----------------------------
   const esc = (s) =>
     String(s ?? "")
       .replaceAll("&", "&amp;")
@@ -92,9 +86,7 @@
     `;
   }
 
-  // ----------------------------
   // Media Modal
-  // ----------------------------
   const mediaModal = document.getElementById("mediaModal");
   const mediaBackdrop = document.getElementById("mediaModalBackdrop");
   const mediaClose = document.getElementById("mediaModalClose");
@@ -211,7 +203,6 @@
     }
   }
 
-  // click card -> open modal (ВАЖНО: берем media-type)
   document.addEventListener("click", (e) => {
     const a = e.target.closest("a.card");
     if (!a) return;
@@ -226,9 +217,7 @@
     openMediaDetails(tmdbId, mediaType, titleText);
   });
 
-  // ----------------------------
   // Genres UI
-  // ----------------------------
   const genresGrid = document.getElementById("genresGrid");
   const selected = new Set();
 
@@ -265,9 +254,7 @@
     });
   }
 
-  // ----------------------------
   // Filters
-  // ----------------------------
   const yearSelect = document.getElementById("yearSelect");
   const countrySelect = document.getElementById("countrySelect");
   const btnApply = document.getElementById("btnApply");
@@ -292,7 +279,6 @@
     resultsBlock.classList.add("fadeInUp");
   }
 
-  // Recommendation row: tv only + fallback
   async function loadRecommendationRow() {
     if (!tvRecoTrack) return;
     tvRecoTrack.innerHTML = `<div class="empty">Loading...</div>`;
@@ -346,7 +332,6 @@
 
   if (btnApply) btnApply.onclick = () => loadResults();
 
-  // Top 30 / 60 series for you (tv only)
   const btnTop30Tv = document.getElementById("btnTop30Tv");
   const btnTop60Tv = document.getElementById("btnTop60Tv");
 
@@ -354,7 +339,6 @@
     if (!tvResTrack) return;
     tvResTrack.innerHTML = `<div class="empty">Loading...</div>`;
   
-    // 1) пробуем персональные рекомендации
     try{
       const d = await fetchJSON(`/api/recommendations?limit=${limit}&type=tv`);
       const items = Array.isArray(data.items) ? data.items : [];
@@ -367,7 +351,6 @@
       console.warn("TV reco failed -> fallback", e);
     }
   
-    // 2) fallback: обычный top tv (top30/top60)
     try {
       const kind = limit === 60 ? "top60" : "top30";
       const top = await fetchJSON(`/api/tv/top?kind=${kind}&lang=ru-RU`);
@@ -387,9 +370,7 @@
   if (btnTop30Tv) btnTop30Tv.onclick = () => loadTopForYou(30);
   if (btnTop60Tv) btnTop60Tv.onclick = () => loadTopForYou(60);
 
-  // ----------------------------
-  // Topbar: Search / Notif / Profile
-  // ----------------------------
+  // Topbar: Search, Notif, Profile
   const btnSearch = document.getElementById("btnSearch");
   const btnNotif = document.getElementById("btnNotif");
   const btnProfile = document.getElementById("btnProfile");
@@ -474,9 +455,7 @@
     });
   }
 
-  // ----------------------------
   // Init
-  // ----------------------------
   (async function init() {
     fillYears();
 
