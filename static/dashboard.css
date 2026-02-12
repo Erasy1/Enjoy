@@ -55,7 +55,6 @@
     height: 48px;
     border-radius: 14px;
   
-    /* вот та самая "тень/плашка" */
     background: rgba(0,0,0,.18);
     box-shadow:
       0 10px 30px rgba(0,0,0,.45),
@@ -75,13 +74,12 @@
     font-size: 14px;
   }
   
-  /* когда sidebar закрыт — плашка остаётся, текст ENJOY скрывается */
   .sidebar.closed .brandText{ display:none; }
   
   
   .brandText{
     flex: 1;
-    text-align: center;        /* ENJOY по центру блока */
+    text-align: center;        
     font-weight: 700;
     letter-spacing: .14em;
     font-size: 18px;
@@ -169,7 +167,7 @@
     width: 40px;
     height: 40px;
     border:0;
-    background: rgba(155, 90, 255, .10);   /* фон кнопки */
+    background: rgba(155, 90, 255, .10);   
     border-radius: 12px;
     cursor:pointer;
     display:flex;
@@ -190,7 +188,7 @@
     width:22px;
     border-radius:999px;
   
-    background: var(--purple);            /* цвет полосок */
+    background: var(--purple);            
     transition: background .15s ease;
   }
   
@@ -238,7 +236,7 @@
     display:grid;
     grid-template-columns: minmax(600px, 1fr) minmax(420px, 520px);
     gap: 32px;
-    align-items: center; /* было start — из-за этого блок “прилипает” вверх */
+    align-items: center; 
   }
 
   .sectionTitle{
@@ -249,7 +247,6 @@
   }
   .sectionTitle.right{ margin-top: 34px; }
   
-  /* Releases cards: 600x300 */
 .trackReleases .releaseCard{
     flex: 0 0 auto;
     width: 600px;
@@ -275,15 +272,14 @@
     text-shadow: 0 6px 18px rgba(0,0,0,.55);
   }
   
-  /* active highlight */
   .trackReleases .releaseCard.active{
     outline: 2px solid rgba(155, 90, 255, 1);
     outline-offset: 3px;
   }
   
   .releaseCard{
-    width: 600px;        /* строго */
-    height: 300px;       /* строго */
+    width: 600px;       
+    height: 300px;       
     max-width: 100%;
     border-radius: 28px;
     overflow:hidden;
@@ -397,8 +393,8 @@
   .track::-webkit-scrollbar-thumb{ background: rgba(255,255,255,.12); border-radius:999px; }
   
   .card{
-    width: 380px;     /* строго */
-    height: 220px;    /* строго */
+    width: 380px;    
+    height: 220px;  
     flex: 0 0 auto;
     border-radius: 22px;
     overflow:hidden;
@@ -533,7 +529,6 @@
   
   .hidden{ display: none !important; }
   
-  /* на мобилке чтобы норм выглядело */
   @media (max-width: 700px){
     .modalTrailer{ height: 320px; }
   }
@@ -554,17 +549,14 @@
     background: rgba(155,90,255,1);
   }
   
-  /* Prevent horizontal scroll due to grid/flex min-width */
 .heroLeft, .heroRight, .trackWrap, .track, .main {
   min-width: 0;
 }
 
-/* Fix hero width (avoid forced 600px + 420px on small screens) */
 .hero{
   grid-template-columns: minmax(0, 1fr) minmax(320px, 520px);
 }
 
-/* Optional: if you still get horizontal scroll */
 html, body{
   overflow-x: hidden;
 }
@@ -584,7 +576,7 @@ html, body{
   border-color: rgba(155, 90, 255, .9);
 }
 
-/* Profile menu (dropdown) */
+/* Profile menu */
 .profileMenu{
   position: fixed;
   top: 64px;
