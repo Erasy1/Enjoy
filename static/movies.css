@@ -1,6 +1,3 @@
-/* ============================= */
-/* Recommendation block */
-/* ============================= */
 
 .blockTop{
   display:flex;
@@ -14,7 +11,6 @@
   width:100%;
 }
 
-/* маленькие постеры */
 .posterTrack .card{
   width:110px;
   height:160px;
@@ -25,10 +21,6 @@
   display:none;
 }
 
-/* ============================= */
-/* Titles */
-/* ============================= */
-
 .rowTitle{
   color: rgba(170, 90, 255, .95);
   font-weight: 800;
@@ -38,10 +30,7 @@
   background: rgba(0,0,0,.25);
 }
 
-/* ============================= */
 /* Filters block */
-/* ============================= */
-
 .filters{
   margin-top: 14px;
   border-radius: 22px;
@@ -57,7 +46,6 @@
   padding: 16px;
 }
 
-/* Genres grid */
 .genresGrid{
   display:grid;
   grid-template-columns: repeat(4, minmax(120px, 1fr));
@@ -97,7 +85,6 @@
   box-shadow: 0 0 0 4px rgba(155,90,255,.18);
 }
 
-/* bottom filters */
 .filtersBottom{
   margin-top: 14px;
   display:flex;
@@ -107,7 +94,6 @@
   flex-wrap:wrap;
 }
 
-/* Selects */
 .select{
   height:36px;
   border-radius:999px;
@@ -127,9 +113,6 @@
   min-width:120px;
 }
 
-/* ============================= */
-/* Results block */
-/* ============================= */
 
 #resultsBlock{
   scroll-margin-top: 90px;
@@ -139,7 +122,6 @@
   min-height: 240px;
 }
 
-/* animation */
 .fadeInUp{
   animation: fadeInUp .22s ease-out both;
 }
@@ -149,9 +131,6 @@
   to{ opacity: 1; transform: translateY(0); }
 }
 
-/* ============================= */
-/* Top lists */
-/* ============================= */
 
 .topList{
   margin-top: 20px;
@@ -212,9 +191,6 @@
   transform: scale(1.05);
 }
 
-/* ============================= */
-/* Responsive */
-/* ============================= */
 
 @media (max-width: 900px){
   .genresGrid{
