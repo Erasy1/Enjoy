@@ -1,9 +1,8 @@
 (function () {
   "use strict";
 
-  // ----------------------------
-  // Sidebar open/close
-  // ----------------------------
+ 
+  // Sidebar open,close
   const sidebar = document.getElementById("sidebar");
   const toggle = document.getElementById("sidebarToggle");
   if (toggle && sidebar) {
@@ -13,9 +12,8 @@
     });
   }
 
-  // ----------------------------
-  // Carousel left/right
-  // ----------------------------
+
+  // Carousel left,righ
   const stepSmall = 380 + 16;
   const stepRelease = 600 + 16;
 
@@ -31,9 +29,9 @@
     });
   });
 
-  // ----------------------------
+  
   // Helpers
-  // ----------------------------
+  
   const esc = (s) =>
     String(s ?? "")
       .replaceAll("&", "&amp;")
@@ -93,9 +91,9 @@
     `;
   }
 
-  // ----------------------------
-  // Media Modal (Watch / Trailer)
-  // ----------------------------
+  
+  // Media Modal
+  
   const mediaModal = document.getElementById("mediaModal");
   const mediaBackdrop = document.getElementById("mediaModalBackdrop");
   const mediaClose = document.getElementById("mediaModalClose");
@@ -121,7 +119,7 @@
     mediaModal.setAttribute("aria-hidden", "true");
     document.body.style.overflow = "";
 
-    // stop trailer
+    
     if (mTrailer) {
       mTrailer.innerHTML = "";
       mTrailer.classList.add("hidden");
@@ -161,7 +159,7 @@
   }
 
   async function openMediaDetails(tmdbId, mediaType, titleFallback) {
-    // reset
+    
     if (mTrailer) {
       mTrailer.innerHTML = "";
       mTrailer.classList.add("hidden");
@@ -203,9 +201,8 @@
     }
   }
 
-  // ----------------------------
-  // Topbar actions: Search / Notifications / Profile
-  // ----------------------------
+  // Topbar actions: Search, Notifications, Profile
+
   const btnSearch = document.getElementById("btnSearch");
   const btnNotif = document.getElementById("btnNotif");
   const btnProfile = document.getElementById("btnProfile");
@@ -238,7 +235,7 @@
     document.body.style.overflow = "";
   }
 
-  // Search open/close
+  // Search open,close
   if (btnSearch) btnSearch.onclick = () => {
     if (profileMenu) profileMenu.classList.remove("open");
     openSimpleModal(searchModal);
@@ -251,7 +248,7 @@
   if (searchBackdrop) searchBackdrop.onclick = () => closeSimpleModal(searchModal);
   if (searchClose) searchClose.onclick = () => closeSimpleModal(searchModal);
 
-  // Notif open/close
+  // Notif open,close
   if (btnNotif) btnNotif.onclick = () => {
     if (profileMenu) profileMenu.classList.remove("open");
     openSimpleModal(notifModal);
@@ -273,7 +270,7 @@
     });
   }
 
-  // Search logic (debounce)
+  // Search logic
   let searchTimer = null;
 
   async function doSearch(q) {
@@ -305,15 +302,11 @@
   }
 
 
-  
-  // ----------------------------
-  // Global click: open media modal by clicking on cards
-  // ----------------------------
+
   document.addEventListener("click", (e) => {
     const a = e.target.closest("a.card");
     if (!a) return;
 
-    // do not open modal on release cards (they have selection logic)
     if (a.classList.contains("releaseCard")) return;
 
     const tmdbId = a.getAttribute("data-tmdb-id");
@@ -322,16 +315,16 @@
 
     e.preventDefault();
 
-    // if clicked from search modal -> close it first
+    
     closeSimpleModal(searchModal);
 
     const titleText = a.querySelector("span") ? a.querySelector("span").textContent : "";
     openMediaDetails(tmdbId, mediaType, titleText);
   });
 
-  // ----------------------------
+
   // Recommendations
-  // ----------------------------
+  
   async function loadRecommendations() {
     const recTrack = document.getElementById("recTrack");
     if (!recTrack) return;
@@ -350,9 +343,8 @@
     }
   }
 
-  // ----------------------------
   // Trending
-  // ----------------------------
+  
   async function loadTrending() {
     const trTrack = document.getElementById("trTrack");
     if (!trTrack) return;
@@ -367,9 +359,7 @@
     }
   }
 
-  // ----------------------------
   // Continue Watching
-  // ----------------------------
   async function loadContinueWatching() {
     const cwTrack = document.getElementById("cwTrack");
     if (!cwTrack) return;
@@ -413,9 +403,7 @@
     }
   }
 
-  // ----------------------------
   // Releases carousel + right info panel
-  // ----------------------------
   async function loadReleasesCarousel() {
     const track = document.getElementById("relTrack");
     if (!track) return;
@@ -466,9 +454,7 @@
     }
   }
 
-  // ----------------------------
   // Escape closes everything
-  // ----------------------------
   document.addEventListener("keydown", (e) => {
     if (e.key !== "Escape") return;
 
@@ -478,9 +464,7 @@
     if (profileMenu) profileMenu.classList.remove("open");
   });
 
-  // ----------------------------
   // Run
-  // ----------------------------
   loadReleasesCarousel();
   loadRecommendations();
   loadTrending();
