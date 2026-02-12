@@ -16,7 +16,7 @@ BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "app.db"
 
 app = Flask(__name__)
-app.secret_key = "1d502d2e479b050729ebb07c8b1d0a34"  # поменяй на длинный рандом
+app.secret_key = "1d502d2e479b050729ebb07c8b1d0a34"  
 
 #  TMDB Config 
 load_dotenv()
@@ -59,7 +59,7 @@ def genre_id(name: str, media_type: str, lang: str = "ru-RU") -> Optional[int]:
 
 
 def build_genre_sets_for_signals(lang: str = "ru-RU") -> Dict[str, set[int]]:
-    # Берём id жанров у TMDB — для эвристик этого достаточно
+    # Берём id жанров у TMDB для эвристик 
     # Если каких-то жанров нет, просто не добавятся
     def gid(n: str) -> Optional[int]:
         return genre_id(n, "movie", lang)
@@ -86,7 +86,6 @@ def build_genre_sets_for_signals(lang: str = "ru-RU") -> Dict[str, set[int]]:
 
 
 def signal_score(genre_ids: List[int], target_set: set[int]) -> float:
-    # насколько жанры item похожи
     s = set(int(x) for x in (genre_ids or []) if isinstance(x, int) or str(x).isdigit())
     return jaccard(s, target_set)
 
@@ -161,7 +160,7 @@ def init_db() -> None:
     )
     """)
     
-        # Continue Watching / History
+        # Continue Watching,History
     cur.execute("""
     CREATE TABLE IF NOT EXISTS watch_history (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -177,7 +176,7 @@ def init_db() -> None:
     )
     """)
     
-        # My List (Watchlist / Planning)
+        # My List 
     cur.execute("""
     CREATE TABLE IF NOT EXISTS watchlist (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -219,7 +218,7 @@ def ensure_db():
         _db_inited = True
 
 
-#  Helpers: read onboarding answers 
+#  read onboarding answers 
 def get_onboarding_answer(user_id: int, qkey: str) -> Optional[str]:
     conn = get_db()
     cur = conn.cursor()
@@ -245,7 +244,7 @@ def get_onboarding_liked_titles(user_id: int) -> List[Dict[str, Any]]:
 
 
 def _normalize_content_type(raw: str) -> str:
-    # Step1: Фильмы / Сериалы / 50–50 
+    # Step1: Фильмы,Сериалы,50–50 
     x = (raw or "").strip().lower()
     if "фильм" in x or x == "movie":
         return "movie"
@@ -256,7 +255,7 @@ def _normalize_content_type(raw: str) -> str:
 
 def _normalize_audio_pref(raw: str) -> str:
     x = (raw or "").strip().lower()
-    # Step2: Озвучка / Субтитры / Без разницы
+    # Step2: Озвучк,Субтитры,Без разницы
     if "озвуч" in x or x == "dub":
         return "dub"
     if "суб" in x or x == "subs":
@@ -265,7 +264,7 @@ def _normalize_audio_pref(raw: str) -> str:
 
 
 def _normalize_pace(raw: str) -> str:
-    # Step 3: Быстрый / Средный / Медленный
+    # Step 3: Быстрый,Средный,Медленный
     x = (raw or "").strip().lower()
     if "динами" in x or x in ("fast", "dynamic"):
         return "fast"
@@ -275,7 +274,7 @@ def _normalize_pace(raw: str) -> str:
 
 
 def _normalize_mood(raw: str) -> str:
-    # Step 4: Легкий / Напряженный / Вдохновлящий / Мрачный / Заставляущий подумать / Без разницы
+    # Step 4: Легкий,Напряженный,Вдохновлящий,Мрачный,Заставляущий подумать,Без разницы
     x = (raw or "").strip().lower()
     if "лёг" in x or "лег" in x or x == "light":
         return "light"
@@ -289,7 +288,7 @@ def _normalize_mood(raw: str) -> str:
         return "think"
     return "mixed"
 
-# Step 5  Сложный / Средний / Простой 
+# Step 5  Сложны,Средний,Простой 
 def _normalize_complexity(raw: str) -> str:
     x = (raw or "").strip().lower()
     if "прост" in x or x == "simple":
@@ -298,7 +297,7 @@ def _normalize_complexity(raw: str) -> str:
         return "complex"
     return "medium"
 
-# Step 9 Возростные ограничения: 16+ / 18+ / Без разницы
+# Step 9 Возростные ограничения: 16+,18+,Без разницы
 def _normalize_age_limit(raw: str) -> str:
     x = (raw or "").strip().lower()
     if "18" in x:
@@ -317,7 +316,7 @@ def build_preferences_from_onboarding(user_id: int) -> Dict[str, Any]:
     q1 = get_onboarding_answer(user_id, "q1") or ""
     content_type = _normalize_content_type(q1)
 
-    # q2 languages JSON: {"languages":[...], "other_text":...}
+    # q2 languages 
     q2_raw = get_onboarding_answer(user_id, "q2")
     languages: List[str] = []
     if q2_raw:
@@ -349,7 +348,7 @@ def build_preferences_from_onboarding(user_id: int) -> Dict[str, Any]:
     if q5_raw:
         payload = jload(q5_raw) or {}
         blocked_genres = payload.get("avoid_genres") or []
-        # если добавлял темы (война/школа/политика) — можно их хранить в том же payload как avoid_topics
+        # если добавлял темы, можно их хранить в том же payload как avoid_topics
         blocked_topics = payload.get("avoid_topics") or []
     if isinstance(blocked_genres, str):
         blocked_genres = [blocked_genres]
@@ -373,7 +372,7 @@ def build_preferences_from_onboarding(user_id: int) -> Dict[str, Any]:
 
     # q9 age limit 
     q9_raw = get_onboarding_answer(user_id, "q9") or ""
-    # можно держать q9 как строку "16+" или JSON. 
+ 
     content_flags: List[str] = []
     if q9_raw.strip().startswith("{"):
         payload = jload(q9_raw) or {}
@@ -469,7 +468,7 @@ def get_user_preferences(user_id: int) -> Optional[Dict[str, Any]]:
 
 
 # TMDB genres + discover
-_GENRE_CACHE: Dict[Tuple[str, str], Dict[str, int]] = {}  # key: (media_type, lang) -> {name_lower: id}
+_GENRE_CACHE: Dict[Tuple[str, str], Dict[str, int]] = {}  
 
 
 def tmdb_get(path: str, params: Dict[str, Any]) -> Dict[str, Any]:
@@ -526,14 +525,14 @@ def build_discover_params(media_type: str, prefs: Dict[str, Any], lang: str) -> 
     if blocked_ids:
         p["without_genres"] = ",".join(map(str, blocked_ids))
 
-    # язык: TMDB поддерживает только один original_language фильтром
+    #  TMDB поддерживает только один original_language фильтром
     langs = prefs.get("languages") or []
     if langs:
         p["with_original_language"] = str(langs[0])
     if prefs.get("age_limit") == "18":
-        p["include_adult"] = "true"   # 18+ разрешаем 
+        p["include_adult"] = "true"   
     else:
-        p["include_adult"] = "false"  # none/16 не adult
+        p["include_adult"] = "false"  
 
     return p
 
@@ -566,7 +565,7 @@ def get_cold_start_recommendations(user_id: int, limit: int = 20) -> List[Dict[s
     if not prefs:
         return []
 
-    lang = "ru-RU"  # язык ответа TMDB (интерфейс)
+    lang = "ru-RU"  # язык ответа TMDB 
 
     # 1) Тип контента вопрос 1
     ct = prefs.get("content_type") or "both"
@@ -592,9 +591,9 @@ def get_cold_start_recommendations(user_id: int, limit: int = 20) -> List[Dict[s
     # 4) Темп/настроение/сложность вопросы 6,7,8 
     signals = build_genre_sets_for_signals(lang)
 
-    pace = prefs.get("pace") or "medium"                # fast/medium/slow
-    mood = prefs.get("mood") or "mixed"                 # light/tense/inspiring/dark/think/mixed
-    complexity = prefs.get("plot_complexity") or "medium"  # simple/medium/complex
+    pace = prefs.get("pace") or "medium"                
+    mood = prefs.get("mood") or "mixed"                 
+    complexity = prefs.get("plot_complexity") or "medium"  
 
     # 5) Любимые тайтлы вопрос 10 используем recommendations 
     favorites = prefs.get("favorite_titles") or []
@@ -603,7 +602,7 @@ def get_cold_start_recommendations(user_id: int, limit: int = 20) -> List[Dict[s
     merged: Dict[Tuple[int, str], Dict[str, Any]] = {}
     sim_count: Dict[Tuple[int, str], int] = {}  
 
-    # A) фильтрация по жанрам/возрасту/языку
+    #  фильтрация по жанрам,возрасту,языку
     for t in types:
         params = build_discover_params(t, prefs, lang)  
         data = tmdb_get(f"/discover/{t}", params)
@@ -614,7 +613,7 @@ def get_cold_start_recommendations(user_id: int, limit: int = 20) -> List[Dict[s
             key = (int(card["tmdb_id"]), t)
             merged[key] = card
 
-    # B) Похожие на любимые 2-3 фаворита
+    # Похожие на любимые 2-3 фаворита
     for fav in favorites[:3]:
         t = fav.get("media_type") or "movie"
         mid = int(fav.get("tmdb_id"))
@@ -799,7 +798,7 @@ def logout():
     return redirect(url_for("home"))
 
 
-#  Dashboard - Главная страница
+#  Главная страница
 @app.route("/dashboard")
 def dashboard():
     if "user_id" not in session:
@@ -844,7 +843,7 @@ def settings_page():
             session.clear()
             return redirect(url_for("login"))
 
-        # ---------- Update nickname ----------
+        #  Update nickname
         if form_type == "nickname":
             nickname = (request.form.get("nickname") or "").strip()
             if len(nickname) < 2:
@@ -860,7 +859,7 @@ def settings_page():
             flash("Nickname updated.")
             return redirect(url_for("settings_page"))
 
-        # ---------- Update email ----------
+        # Update email 
         if form_type == "email":
             email = (request.form.get("email") or "").strip().lower()
             password = (request.form.get("password") or "").strip()
@@ -887,7 +886,7 @@ def settings_page():
             flash("Email updated.")
             return redirect(url_for("settings_page"))
 
-        # ---------- Update password ----------
+        #  Update password 
         if form_type == "password":
             old_password = (request.form.get("old_password") or "").strip()
             new_password = (request.form.get("new_password") or "").strip()
@@ -1068,7 +1067,7 @@ def onboarding_step(step: int):
     return render_template("onboarding_step_placeholder.html", step=step)
 
 
-#  TMDB API (backend proxy для пойска и деталей тайтлов, а также сохранения любимых тайтлов с онбординга
+#  TMDB API backend proxy для пойска и деталей тайтлов
 @app.get("/api/tmdb/search")
 def api_tmdb_search():
     q = (request.args.get("q") or "").strip()
@@ -1220,7 +1219,7 @@ def api_recommendations():
     limit = int(request.args.get("limit") or 20)
     limit = max(1, min(limit, 60))
 
-    only_type = (request.args.get("type") or "").strip()  # movie | tv | ""
+    only_type = (request.args.get("type") or "").strip()  
 
     items = get_cold_start_recommendations(int(session["user_id"]), limit=limit*2)
 
@@ -1564,9 +1563,9 @@ def api_tv_discover():
     lang = (request.args.get("lang") or "ru-RU").strip()
     page = max(1, min(int(request.args.get("page") or 1), 20))
 
-    genres = (request.args.get("genres") or "").strip()   # "10759,18"
-    year = (request.args.get("year") or "").strip()       # "2024"
-    region = (request.args.get("region") or "").strip()   # "US" (для TV почти не влияет, но оставим)
+    genres = (request.args.get("genres") or "").strip()   
+    year = (request.args.get("year") or "").strip()       
+    region = (request.args.get("region") or "").strip()   
 
     params = {
         "language": lang,
