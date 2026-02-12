@@ -1,7 +1,7 @@
 (function () {
     "use strict";
   
-    // ---------- helpers ----------
+    // helpers 
     const esc = (s) =>
       String(s ?? "")
         .replaceAll("&", "&amp;")
@@ -23,7 +23,7 @@
       return r.json();
     }
   
-    // ---------- modal refs ----------
+    //  modal refs 
     const mediaModal = document.getElementById("mediaModal");
     const mediaBackdrop = document.getElementById("mediaModalBackdrop");
     const mediaClose = document.getElementById("mediaModalClose");
@@ -38,10 +38,9 @@
     const btnTrailer = document.getElementById("btnTrailer");
     const btnArchive = document.getElementById("btnArchive");
   
-    if (!mediaModal) return; // если на странице нет модалки — просто выходим
+    if (!mediaModal) return; 
   
-    let currentItem = null; // {tmdb_id, media_type, title, poster_url}
-  
+    let currentItem = null; 
     function openModal() {
       mediaModal.classList.add("open");
       mediaModal.setAttribute("aria-hidden", "false");
@@ -164,7 +163,6 @@
       }
     }
   
-    // ---------- GLOBAL click handler (works on Home + Movies) ----------
     document.addEventListener("click", (e) => {
       const a = e.target.closest("a.card");
       if (!a) return;
