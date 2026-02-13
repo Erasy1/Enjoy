@@ -1,7 +1,6 @@
 (function () {
   "use strict";
 
-  // Sidebar toggle
   const sidebar = document.getElementById("sidebar");
   const toggle = document.getElementById("sidebarToggle");
   if (toggle && sidebar) {
@@ -11,7 +10,6 @@
     });
   }
 
-  // Carousel arrows
   const stepSmall = 380 + 16;
   const stepPoster = 110 + 16;
 
@@ -27,7 +25,6 @@
     });
   });
 
-  // Helpers
   const esc = (s) =>
     String(s ?? "")
       .replaceAll("&", "&amp;")
@@ -83,7 +80,6 @@
     `;
   }
 
-  // Media Modal 
   const mediaModal = document.getElementById("mediaModal");
   const mediaBackdrop = document.getElementById("mediaModalBackdrop");
   const mediaClose = document.getElementById("mediaModalClose");
@@ -214,7 +210,6 @@
     openMediaDetails(tmdbId, mediaType, titleText);
   });
 
-  // Genres UI
   const genresGrid = document.getElementById("genresGrid");
   const selected = new Set();
 
@@ -251,7 +246,6 @@
     });
   }
 
-  // Filters
   const yearSelect = document.getElementById("yearSelect");
   const countrySelect = document.getElementById("countrySelect");
   const btnApply = document.getElementById("btnApply");
@@ -371,7 +365,6 @@
   top30Btns.forEach((b) => b.addEventListener("click", () => loadTop(30)));
   top60Btns.forEach((b) => b.addEventListener("click", () => loadTop(60)));
 
-  // Topbar: Search , Notif ,Profile
   const btnSearch = document.getElementById("btnSearch");
   const btnNotif = document.getElementById("btnNotif");
   const btnProfile = document.getElementById("btnProfile");

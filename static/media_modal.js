@@ -1,8 +1,6 @@
 (function () {
     "use strict";
-  
-    // helpers 
-    const esc = (s) =>
+      const esc = (s) =>
       String(s ?? "")
         .replaceAll("&", "&amp;")
         .replaceAll("<", "&lt;")
@@ -23,7 +21,6 @@
       return r.json();
     }
   
-    //  modal refs 
     const mediaModal = document.getElementById("mediaModal");
     const mediaBackdrop = document.getElementById("mediaModalBackdrop");
     const mediaClose = document.getElementById("mediaModalClose");
@@ -92,7 +89,6 @@
     }
   
     async function openMediaDetails(tmdbId, mediaType, titleFallback) {
-      // reset UI
       if (mTrailer) {
         mTrailer.innerHTML = "";
         mTrailer.classList.add("hidden");

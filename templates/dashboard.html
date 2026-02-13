@@ -19,25 +19,44 @@
         <div class="brandBadge" aria-hidden="true">
           <span class="brandBadgeText">Ej</span>
         </div>
-        
       </div>
-      
-      <nav class="nav" aria-label="Main navigation">
-        <a class="navItem active" href="#"><span class="navIcon">🏠</span><span class="navLabel">Home</span></a>
-        <a class="navItem" href="{{ url_for('movies_page') }}"><span class="navIcon">🎬</span><span class="navLabel">Movies</span></a>        
-        <a class="navItem" href="{{ url_for('series_page') }}"><span class="navIcon">📺</span><span class="navLabel">Series</span></>
-        <a class="navItem" href="{{ url_for('my_list_page') }}"><span class="navIcon">🧾</span><span class="navLabel">My list</span></a>
-          
-        <div class="navDivider"></div>
 
-        <!--<a class="navItem" href="#"><span class="navIcon">👥</span><span class="navLabel">Community</span></a>
-        <a class="navItem" href="#"><span class="navIcon">💬</span><span class="navLabel">Social</span></a>
-        <a class="navItem" href="#"><span class="navIcon">🔥</span><span class="navLabel">Trends</span></a>
+      <nav class="nav" aria-label="Main navigation">
+        <a class="navItem {{ 'active' if active_page=='home' else '' }}" href="{{ url_for('dashboard') }}">
+          <span class="navIcon">🏠</span><span class="navLabel">Home</span>
+        </a>
+
+        <a class="navItem {{ 'active' if active_page=='movies' else '' }}" href="{{ url_for('movies_page') }}">
+          <span class="navIcon">🎬</span><span class="navLabel">Movies</span>
+        </a>
+
+        <a class="navItem {{ 'active' if active_page=='series' else '' }}" href="{{ url_for('series_page') }}">
+          <span class="navIcon">📺</span><span class="navLabel">Series</span>
+        </a>
+
+        <a class="navItem {{ 'active' if active_page=='my_list' else '' }}" href="{{ url_for('my_list_page') }}">
+          <span class="navIcon">🧾</span><span class="navLabel">My list</span>
+        </a>
+
+        <a class="navItem {{ 'active' if active_page=='analytics' else '' }}" href="{{ url_for('analytics') }}">
+          <span class="navIcon">📊</span><span class="navLabel">Analytics</span>
+        </a>
+
+        <a class="navItem {{ 'active' if active_page=='assistant' else '' }}" href="{{ url_for('assistant_page_v2') }}">
+          <span class="navIcon">🤖</span><span class="navLabel">AI Assistant</span>
+
+
+        <div class="navDivider"></div>
       </nav>
-    -->
+
       <div class="sideBottom">
-        <a href="{{ url_for('settings_page') }}" class="profileMenuItem">⚙️ Settings</a>
-        <a class="sideBtn logout" href="{{ url_for('logout') }}">⎋ <span class="navLabel">Logout</span></a>
+        <a class="navItem {{ 'active' if active_page=='account' else '' }}" href="{{ url_for('settings_page') }}">
+          <span class="navIcon">👤</span><span class="navLabel">Account</span>
+        </a>
+
+        <a class="sideBtn logout" href="{{ url_for('logout') }}">
+          ⎋ <span class="navLabel">Logout</span>
+        </a>
       </div>
     </aside>
 
@@ -52,7 +71,7 @@
         <div class="topActions">
           <button class="topIcon" id="btnSearch" type="button" aria-label="Search" title="Search">🔍</button>
           <button class="topIcon" id="btnNotif" type="button" aria-label="Notifications" title="Notifications">🔔</button>
-          
+
           <button class="profile" id="btnProfile" type="button" aria-label="Profile" title="Profile">
             <span class="avatar">👤</span>
             <span class="nick">{{ nickname }}</span>
@@ -140,7 +159,7 @@
             <button class="arrow" type="button" data-target="trTrack" data-dir="1" aria-label="Right">❯</button>
           </div>
         </div>
-
+   
         <div class="trackWrap">
           <div class="track" id="trTrack">
             <a class="card" href="#"><img src="{{ url_for('static', filename='tr1.jpg') }}" alt=""><span>Trending 1</span></a>
@@ -151,8 +170,81 @@
           </div>
         </div>
       </section>
+      <!-- Random Film of the day (after Trending Now) -->
+      <section class="randomDay" id="randomDaySection">
+        <div class="randomDayHead">
+          <div class="randomDayTitleH2">Random film for you</div>
+      
+          <button class="randomDayBtn" id="randomDayBtn" type="button">Get random</button>
+        </div>
+      
+        <div class="randomDayCard hidden" id="randomDayCard">
+          <div class="randomDayPosterWrap">
+            <img id="randomDayPoster" class="randomDayPoster" alt="Poster" />
+          </div>
+      
+          <div class="randomDayInfo">
+            <div class="randomDayTopRow">
+              <div class="randomDayName" id="randomDayName">—</div>
+              <span class="randomDayBadge" id="randomDayBadge">—</span>
+            </div>
+      
+            <div class="randomDayMeta">
+              <span id="randomDayDate">—</span>
+              <span class="dot">•</span>
+              <span id="randomDayVote">⭐ 0.0</span>
+            </div>
+      
+            <p class="randomDayOverview" id="randomDayOverview">Click “Get random” to show a movie or series.</p>
+      
+            <button id="randomDayMore" class="randomDayLinkBtn" type="button">More Info</button>
+          </div>
+        </div>
+      </section>
+
     </main>
   </div>
+  
+  <!-- Random Details Modal -->
+<div class="rdmOverlay hidden" id="rdmOverlay" aria-hidden="true">
+  <div class="rdmModal" role="dialog" aria-modal="true" aria-label="Details">
+    <button class="rdmClose" id="rdmClose" type="button" aria-label="Close">×</button>
+
+    <div class="rdmGrid">
+      <div class="rdmPosterWrap">
+        <img id="rdmPoster" alt="Poster" />
+      </div>
+
+      <div class="rdmContent">
+        <div class="rdmTrailer hidden" id="rdmTrailerContainer">
+          <div class="rdmTrailerInner">
+            <iframe
+              id="rdmTrailerFrame"
+              width="100%"
+              height="420"
+              frameborder="0"
+              allow="autoplay; encrypted-media"
+              allowfullscreen>
+            </iframe>
+          </div>
+        </div>
+        
+        <h3 class="rdmTitle" id="rdmTitle">—</h3>
+
+        <div class="rdmMeta" id="rdmMeta">—</div>
+
+        <p class="rdmOverview" id="rdmOverview">—</p>
+
+        <div class="rdmActions">
+          <button class="rdmBtn" id="rdmWatchBtn" type="button">▶ Watch</button>
+          <button class="rdmBtn" id="rdmTrailerBtn" type="button">🎬 Trailer</button>
+          <button class="rdmBtn" id="rdmArchiveBtn" type="button">📌 Archive</button>
+        </div>        
+      </div>
+    </div>
+  </div>
+</div>
+
 
   <!-- MODAL: More Info -->
   <div class="modal" id="infoModal" aria-hidden="true">
@@ -225,7 +317,7 @@
 
 
 <div class="profileMenu" id="profileMenu">
-  <a href="{{ url_for('settings_page') }}" class="profileMenuItem">⚙️ Settings</a>
+  <a href="{{ url_for('settings_page') }}" class="profileMenuItem">👤 Account</a>
   <div class="profileMenuDivider"></div>
   <a href="{{ url_for('logout') }}" class="profileMenuItem danger">⎋ Logout</a>
 </div>
@@ -245,10 +337,14 @@
   </div>
 </div>
 
+
   <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
   <script src="{{ url_for('static', filename='media_modal.js') }}"></script>
-  <script src="{{ url_for('static', filename='movies.js') }}"></script>
+  <script src="{{ url_for('static', filename='random.js') }}"></script>
 
+
+  
+  
 </body>
 </html>
 

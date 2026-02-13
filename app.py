@@ -1,16 +1,18 @@
 from __future__ import annotations
 import json
+from collections import Counter
 import os
 import sqlite3
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 import math
-
+import random
 import requests
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
-
+from datetime import datetime
+from zoneinfo import ZoneInfo
 #  Paths & App 
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "app.db"
@@ -205,6 +207,28 @@ def init_db() -> None:
         FOREIGN KEY(user_id) REFERENCES users(id)
     )
     """)
+    
+    # Analytics history (просмотренные тайтлы)
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS view_history (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        tmdb_id INTEGER NOT NULL,
+        media_type TEXT NOT NULL,   -- movie / tv
+        title TEXT NOT NULL,
+        genre_ids TEXT,             -- JSON список genre_ids
+        runtime INTEGER,            -- минуты
+        rating REAL,                -- рейтинг TMDB
+        watched_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(user_id) REFERENCES users(id)
+    )
+    """)
+    
+    cur.execute("""
+    CREATE UNIQUE INDEX IF NOT EXISTS ux_view_history_user_item
+        ON view_history(user_id, tmdb_id, media_type)
+    """)
+
     conn.commit()
     conn.close()
 
@@ -537,11 +561,12 @@ def build_discover_params(media_type: str, prefs: Dict[str, Any], lang: str) -> 
     return p
 
 
-def normalize_tmdb_card(it: Dict[str, Any]) -> Dict[str, Any]:
+def normalize_tmdb_card(it: Dict[str, Any], force_type: str | None = None) -> Dict[str, Any]:
     title = it.get("title") or it.get("name") or ""
     year = (it.get("release_date") or it.get("first_air_date") or "")[:4]
     poster_path = it.get("poster_path")
-    media_type = it.get("media_type")
+
+    media_type = force_type or it.get("media_type")
 
     return {
         "tmdb_id": it.get("id"),
@@ -549,14 +574,13 @@ def normalize_tmdb_card(it: Dict[str, Any]) -> Dict[str, Any]:
         "title": title,
         "year": year,
         "poster_url": (TMDB_IMG + poster_path) if poster_path else None,
-
-        #  важно для формулы
         "genre_ids": it.get("genre_ids") or [],
         "original_language": it.get("original_language") or "",
         "vote_average": float(it.get("vote_average") or 0.0),
         "popularity": float(it.get("popularity") or 0.0),
         "overview": it.get("overview") or "",
     }
+
 
 
 
@@ -821,7 +845,10 @@ def dashboard():
         nickname=session.get("nickname", "User"),
         show_recommendations_block=show_recommendations_block,
         show_continue_watching=show_continue_watching,
+        active_page="home",  
     )
+
+
 
 @app.route("/settings", methods=["GET", "POST"])
 def settings_page():
@@ -933,7 +960,10 @@ def settings_page():
 def movies_page():
     if "user_id" not in session:
         return redirect(url_for("login"))
-    return render_template("movies.html", nickname=session.get("nickname", "User"))
+    return render_template("movies.html",
+                           nickname=session.get("nickname", "User"),
+                           active_page="movies")   
+
 
 # вопросы интро
 @app.route("/onboarding")
@@ -1142,6 +1172,12 @@ def api_tmdb_details(tmdb_id: int):
         "release_date": it.get("release_date") or it.get("first_air_date"),
         "media_type": media_type,
     })
+def tmdb_details(tmdb_id: int, media_type: str = "movie", lang: str = "ru-RU") -> dict:
+    if media_type not in ("movie", "tv"):
+        media_type = "movie"
+    data = tmdb_get(f"/{media_type}/{tmdb_id}", {"language": lang})
+    return data
+    
 
 # Save, Get onboarding titles
 @app.post("/api/onboarding/title")
@@ -1360,8 +1396,12 @@ def api_watch_start():
     if not title:
         title = f"tmdb:{tmdb_id}"
 
+    user_id = session["user_id"]
+
     conn = get_db()
     cur = conn.cursor()
+
+    # 1) Continue Watching (как у тебя было)
     cur.execute("""
         INSERT INTO watch_history (user_id, tmdb_id, media_type, title, poster_url, progress)
         VALUES (?, ?, ?, ?, ?, 0)
@@ -1369,11 +1409,51 @@ def api_watch_start():
             title=excluded.title,
             poster_url=COALESCE(excluded.poster_url, watch_history.poster_url),
             last_watched_at=CURRENT_TIMESTAMP
-    """, (session["user_id"], tmdb_id, media_type, title, poster_url))
+    """, (user_id, tmdb_id, media_type, title, poster_url))
+
+    # 2) Analytics history (view_history)
+    # Берём genre_ids/runtime/rating из TMDB details (через твой же endpoint)
+    genre_ids_json = "[]"
+    runtime = None
+    rating = None
+
+    try:
+        d = tmdb_details(tmdb_id, media_type=media_type, lang="ru-RU")  # <-- см. функцию ниже
+        rating = float(d.get("vote_average") or 0)
+
+        # genres может быть массив объектов [{id,name}, ...]
+        genres = d.get("genres") or []
+        ids = []
+        for g in genres:
+            if isinstance(g, dict) and "id" in g:
+                ids.append(int(g["id"]))
+        genre_ids_json = json.dumps(ids, ensure_ascii=False)
+
+        if media_type == "movie":
+            runtime = int(d.get("runtime") or 0) or None
+        else:
+            # tmdb tv: episode_run_time может быть [45]
+            er = d.get("episode_run_time") or []
+            runtime = int(er[0]) if isinstance(er, list) and er else None
+    except Exception:
+        pass
+
+    cur.execute("""
+        INSERT INTO view_history (user_id, tmdb_id, media_type, title, genre_ids, runtime, rating)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(user_id, tmdb_id, media_type) DO UPDATE SET
+            title=excluded.title,
+            genre_ids=COALESCE(excluded.genre_ids, view_history.genre_ids),
+            runtime=COALESCE(excluded.runtime, view_history.runtime),
+            rating=COALESCE(excluded.rating, view_history.rating),
+            watched_at=CURRENT_TIMESTAMP
+    """, (user_id, tmdb_id, media_type, title, genre_ids_json, runtime, rating))
+
     conn.commit()
     conn.close()
 
     return jsonify({"ok": True})
+
 
 # прогресс просмотра сохраняем в истории просмотров и для формулы рекомендацй
 @app.post("/api/watch/progress")
@@ -1502,7 +1582,7 @@ def api_movies_discover():
 
     items = []
     for it in data.get("results", []):
-        card = normalize_tmdb_card(it)
+        card = normalize_tmdb_card(it, force_type="tv")
         card["media_type"] = "movie"
         items.append(card)
 
@@ -1544,7 +1624,10 @@ def api_movies_top():
 def series_page():
     if "user_id" not in session:
         return redirect(url_for("login"))
-    return render_template("series.html", nickname=session.get("nickname", "User"))
+    return render_template("series.html",
+                           nickname=session.get("nickname", "User"),
+                           active_page="series")   # 
+
 
 # genres tv для отображения жанров сериалов в вопросах
 @app.get("/api/genres/tv")
@@ -1621,11 +1704,14 @@ def api_tv_top():
     return jsonify({"items": items[:limit]})
 
 # my_list страница для отображения сохраненных фильмов и сериалов
-@app.route("/my-list")
+@app.route("/my_list")
 def my_list_page():
     if "user_id" not in session:
         return redirect(url_for("login"))
-    return render_template("my_list.html", nickname=session.get("nickname", "User"))
+    return render_template("my_list.html",
+                           nickname=session.get("nickname", "User"),
+                           active_page="my_list")  # 
+
 
 # my_list API для получения списка сохраненных фил/сер
 @app.get("/api/my_list")
@@ -1707,6 +1793,289 @@ def api_my_list_remove():
     return jsonify({"ok": True})
 
 
+
+def tmdb_get(path: str, params: dict | None = None) -> dict:
+    if not TMDB_API_KEY:
+        raise RuntimeError("TMDB_API_KEY is missing in environment (.env).")
+    p = {"api_key": TMDB_API_KEY, "language": "en-US"}
+    if params:
+        p.update(params)
+    r = requests.get(f"{TMDB_BASE}{path}", params=p, timeout=15)
+    r.raise_for_status()
+    return r.json()
+
+
+def pick_random_tmdb_item(media_type: str) -> dict:
+
+    if media_type == "movie":
+        path = "/discover/movie"
+        extra = {"sort_by": "popularity.desc", "include_adult": "false"}
+    else:
+        path = "/discover/tv"
+        extra = {"sort_by": "popularity.desc"}
+
+    # 1) узнаём сколько страниц
+    first = tmdb_get(path, {**extra, "page": 1})
+    total_pages = int(first.get("total_pages") or 1)
+    total_pages = max(1, min(total_pages, 500))  
+
+    # 2) берём рандомную страницу и рандомный элемент
+    page = random.randint(1, total_pages)
+    data = tmdb_get(path, {**extra, "page": page})
+    results = data.get("results") or []
+
+    if not results:
+        # fallback на trending
+        data = tmdb_get(f"/trending/{media_type}/day", {"page": 1})
+        results = data.get("results") or []
+
+    return random.choice(results)
+
+
+def normalize_card(media_type: str, item: dict) -> dict:
+    title = item.get("title") if media_type == "movie" else item.get("name")
+    date = item.get("release_date") if media_type == "movie" else item.get("first_air_date")
+    poster = item.get("poster_path")
+    backdrop = item.get("backdrop_path")
+
+    return {
+        "media_type": media_type,
+        "id": item.get("id"),
+        "title": title or "Untitled",
+        "date": date or "",
+        "vote": float(item.get("vote_average") or 0),
+        "overview": item.get("overview") or "",
+        "poster_url": f"https://image.tmdb.org/t/p/w500{poster}" if poster else "",
+        "backdrop_url": f"https://image.tmdb.org/t/p/w780{backdrop}" if backdrop else "",
+    }
+
+
+@app.get("/api/random")
+def api_random():
+    # каждый запрос заново выбираем тип + тайтл
+    media_type = random.choice(["movie", "tv"])
+    raw = pick_random_tmdb_item(media_type)
+    card = normalize_card(media_type, raw)
+    return jsonify(card)
+
+@app.get("/api/trailer/<media_type>/<int:tmdb_id>")
+def api_trailer(media_type: str, tmdb_id: int):
+    if media_type not in ("movie", "tv"):
+        return jsonify({"ok": False, "error": "bad media_type"}), 400
+
+    data = tmdb_get(f"/{media_type}/{tmdb_id}/videos", {"language": "en-US"})
+    results = data.get("results") or []
+
+    # приоритет: Trailer на YouTube
+    yt = [v for v in results if (v.get("site") == "YouTube")]
+    trailer = next((v for v in yt if (v.get("type") == "Trailer")), None) or (yt[0] if yt else None)
+
+    if not trailer or not trailer.get("key"):
+        return jsonify({"ok": False, "url": ""})
+
+    url = f"https://www.youtube.com/watch?v={trailer['key']}"
+    return jsonify({"ok": True, "url": url})
+
+def add_to_history(user_id, movie):
+    conn = get_db()
+    cur = conn.cursor()
+
+    cur.execute("""
+        INSERT INTO watch_history 
+        (user_id, tmdb_id, content_type, title, genre_ids, runtime, rating)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    """, (
+        user_id,
+        movie["id"],
+        movie["type"],
+        movie["title"],
+        json.dumps(movie.get("genre_ids", [])),
+        movie.get("runtime", 0),
+        movie.get("rating", 0),
+    ))
+
+    conn.commit()
+    conn.close()
+
+
+
+@app.route("/analytics")
+def analytics():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    user_id = session["user_id"]
+    conn = get_db()
+    cur = conn.cursor()
+
+    rows = cur.execute("""
+        SELECT tmdb_id, media_type, title, genre_ids, runtime, rating, watched_at
+        FROM view_history
+        WHERE user_id = ?
+        ORDER BY watched_at DESC
+    """, (user_id,)).fetchall()
+
+    # 1) Сколько посмотрел
+    total_titles = len(rows)
+
+    # 2) Сколько времени потратил
+    total_minutes = 0
+    for r in rows:
+        try:
+            total_minutes += int(r["runtime"] or 0)
+        except Exception:
+            pass
+
+    # 3) Любимый жанр 
+    genre_counter = Counter()
+    for r in rows:
+        raw = r["genre_ids"] or "[]"
+        try:
+            ids = json.loads(raw) if isinstance(raw, str) else raw
+            if isinstance(ids, str):
+                ids = json.loads(ids)
+            if isinstance(ids, list):
+                genre_counter.update([int(x) for x in ids if isinstance(x, int) or str(x).isdigit()])
+        except Exception:
+            pass
+
+
+
+    def genre_name(gid: int) -> str:
+        return GENRE_ID_TO_NAME.get(gid, f"Genre {gid}") if "GENRE_ID_TO_NAME" in globals() else f"Genre {gid}"
+
+    favorite_genre = "—"
+    if genre_counter:
+        fav_id = genre_counter.most_common(1)[0][0]
+        favorite_genre = genre_name(fav_id)
+
+    # данные для графика жанров 
+    top = genre_counter.most_common(8)
+    genre_labels = [genre_name(gid) for gid, _ in top]
+    genre_values = [cnt for _, cnt in top]
+    other = sum(genre_counter.values()) - sum(genre_values)
+    if other > 0:
+        genre_labels.append("Other")
+        genre_values.append(other)
+
+    
+    month_counter = Counter()
+    for r in rows:
+        dt = str(r["watched_at"] or "")
+        if len(dt) >= 7:
+            month = dt[:7]
+            month_counter[month] += int(r["runtime"] or 0)
+
+    months = sorted(month_counter.keys())
+    minutes_by_month = [month_counter[m] for m in months]
+
+    return render_template(
+        "analytics.html",
+        total_titles=total_titles,
+        favorite_genre=favorite_genre,
+        total_minutes=total_minutes,
+        genre_labels=genre_labels,
+        genre_values=genre_values,
+        months=months,
+        minutes_by_month=minutes_by_month
+    )
+
+GENRE_ID_TO_NAME = {
+    28: "Action",
+    12: "Adventure",
+    16: "Animation",
+    35: "Comedy",
+    80: "Crime",
+    99: "Documentary",
+    18: "Drama",
+    10751: "Family",
+    14: "Fantasy",
+    36: "History",
+    27: "Horror",
+    10402: "Music",
+    9648: "Mystery",
+    10749: "Romance",
+    878: "Science Fiction",
+    10770: "TV Movie",
+    53: "Thriller",
+    10752: "War",
+    37: "Western",
+    # TV genres 
+    10759: "Action & Adventure",
+    10762: "Kids",
+    10763: "News",
+    10764: "Reality",
+    10765: "Sci-Fi & Fantasy",
+    10766: "Soap",
+    10767: "Talk",
+    10768: "War & Politics",
+}
+
+@app.get("/assistant")
+def assistant_page_v2():
+    return render_template("ai_assistant.html", nickname=session.get("nickname", "user"), active_page="assistant")
+
+
+
+@app.post("/api/assistant/search")
+def assistant_search_v2():
+    data = request.get_json(silent=True) or {}
+
+    query = (data.get("query") or "").strip()
+    media_type = data.get("media_type", "multi")
+    year = data.get("year")
+    genre_id = data.get("genre_id")
+    lang = data.get("lang", "ru-RU")
+    limit = int(data.get("limit", 18))
+
+    if not query:
+        return jsonify({"items": []})
+
+    results = []
+
+    def process(items, mtype):
+        for it in items:
+            title = it.get("title") or it.get("name")
+            if not title:
+                continue
+
+            # Фильтр по году
+            if year:
+                date = it.get("release_date") if mtype == "movie" else it.get("first_air_date")
+                if not date or not str(date).startswith(str(year)):
+                    continue
+
+            # Фильтр по жанру
+            if genre_id:
+                gids = it.get("genre_ids") or []
+                if int(genre_id) not in gids:
+                    continue
+
+            results.append({
+                "tmdb_id": it.get("id"),
+                "media_type": mtype,
+                "title": title,
+                "overview": it.get("overview", ""),
+                "vote_average": it.get("vote_average", 0),
+                "popularity": it.get("popularity", 0),
+                "poster_url": f"https://image.tmdb.org/t/p/w500{it['poster_path']}" if it.get("poster_path") else None
+            })
+
+    if media_type in ("multi", "movie"):
+        res = tmdb_get("/search/movie", {"language": lang, "query": query})
+        process(res.get("results", [])[:50], "movie")
+
+    if media_type in ("multi", "tv"):
+        res = tmdb_get("/search/tv", {"language": lang, "query": query})
+        process(res.get("results", [])[:50], "tv")
+
+    # Умная сортировка
+    results.sort(
+        key=lambda x: (x["vote_average"] * 2 + min(x["popularity"] / 50, 5)),
+        reverse=True
+    )
+
+    return jsonify({"items": results[:limit]})
 
 if __name__ == "__main__":
     app.run(debug=True)

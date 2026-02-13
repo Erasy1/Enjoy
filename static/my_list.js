@@ -1,7 +1,6 @@
 (function () {
     "use strict";
   
-    // Sidebar toggle
     const sidebar = document.getElementById("sidebar");
     const toggle = document.getElementById("sidebarToggle");
     if (toggle && sidebar) {
@@ -11,7 +10,6 @@
       });
     }
   
-    // Carousel arrows
     const stepWide = 560 + 16;
     document.querySelectorAll(".arrow").forEach((btn) => {
       btn.addEventListener("click", () => {
@@ -23,7 +21,6 @@
       });
     });
   
-    // Helpers
     const esc = (s) =>
       String(s ?? "")
         .replaceAll("&", "&amp;")
@@ -45,7 +42,6 @@
       return `${m}:${String(s).padStart(2,"0")}`;
     }
   
-    // Tracks
     const watchNowTrack = document.getElementById("watchNowTrack");
     const planningTrack = document.getElementById("planningTrack");
   

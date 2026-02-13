@@ -3,18 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ENJOY - My List</title>
+  <title>ENJOY — Analytics</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Pontano+Sans&display=swap" rel="stylesheet">
 
+  <!-- стиль как Home -->
   <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='my_list.css') }}">
+  <!-- локальные стили analytics -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='analytics_dash.css') }}">
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
   <div class="layout">
-
     <!-- SIDEBAR -->
     <aside class="sidebar" id="sidebar" aria-label="Sidebar">
       <div class="brandRow">
@@ -22,124 +26,107 @@
           <span class="brandBadgeText">Ej</span>
         </div>
       </div>
-    
+
       <nav class="nav" aria-label="Main navigation">
         <a class="navItem {{ 'active' if active_page=='home' else '' }}" href="{{ url_for('dashboard') }}">
           <span class="navIcon">🏠</span><span class="navLabel">Home</span>
         </a>
-    
+
         <a class="navItem {{ 'active' if active_page=='movies' else '' }}" href="{{ url_for('movies_page') }}">
           <span class="navIcon">🎬</span><span class="navLabel">Movies</span>
         </a>
-    
+
         <a class="navItem {{ 'active' if active_page=='series' else '' }}" href="{{ url_for('series_page') }}">
           <span class="navIcon">📺</span><span class="navLabel">Series</span>
         </a>
-    
+
         <a class="navItem {{ 'active' if active_page=='my_list' else '' }}" href="{{ url_for('my_list_page') }}">
           <span class="navIcon">🧾</span><span class="navLabel">My list</span>
         </a>
-    
+
         <a class="navItem {{ 'active' if active_page=='analytics' else '' }}" href="{{ url_for('analytics') }}">
           <span class="navIcon">📊</span><span class="navLabel">Analytics</span>
         </a>
-        
+
         <a class="navItem {{ 'active' if active_page=='assistant' else '' }}" href="{{ url_for('assistant_page_v2') }}">
           <span class="navIcon">🤖</span><span class="navLabel">AI Assistant</span>
         </a>
-        
+
         <div class="navDivider"></div>
       </nav>
-    
+
       <div class="sideBottom">
         <a class="navItem {{ 'active' if active_page=='account' else '' }}" href="{{ url_for('settings_page') }}">
           <span class="navIcon">👤</span><span class="navLabel">Account</span>
         </a>
-    
+
         <a class="sideBtn logout" href="{{ url_for('logout') }}">
           ⎋ <span class="navLabel">Logout</span>
         </a>
       </div>
     </aside>
-    
+
     <!-- MAIN -->
     <main class="main">
       <!-- TOPBAR -->
       <header class="topbar">
-        <button class="sidebarToggle" id="sidebarToggle" type="button" aria-label="Toggle sidebar">
+        <button class="sidebarToggle" id="sidebarToggle" type="button" aria-label="Toggle sidebar" title="Toggle sidebar">
           <span></span><span></span>
         </button>
 
         <div class="topActions">
-          <button class="topIcon" id="btnSearch" type="button" title="Search">🔍</button>
-          <button class="topIcon" id="btnNotif" type="button" title="Notifications">🔔</button>
-          <button class="profile" id="btnProfile" type="button" title="Profile">
+          <button class="topIcon" id="btnSearch" type="button" aria-label="Search" title="Search">🔍</button>
+          <button class="topIcon" id="btnNotif" type="button" aria-label="Notifications" title="Notifications">🔔</button>
+
+          <button class="profile" id="btnProfile" type="button" aria-label="Profile" title="Profile">
             <span class="avatar">👤</span>
             <span class="nick">{{ nickname }}</span>
           </button>
         </div>
       </header>
 
-      <!-- WATCHING NOW -->
-      <section class="block">
-        <div class="blockTop">
-          <div class="sectionTitle">Watching now</div>
-          <div class="arrows">
-            <button class="arrow" type="button" data-target="watchNowTrack" data-dir="-1">❮</button>
-            <button class="arrow" type="button" data-target="watchNowTrack" data-dir="1">❯</button>
+      <!-- CONTENT -->
+      <section class="anWrap">
+        <div class="anHeader">
+          <div class="anTitle">Analytics</div>
+          <div class="anSub">History of views and preferences</div>
+        </div>
+
+        <section class="anCards">
+          <div class="anCard">
+            <div class="anCardTitle">Viewed</div>
+            <div class="anCardValue">{{ total_titles }}</div>
+            <div class="anCardHint">titles</div>
           </div>
-        </div>
 
-        <div class="trackWrap">
-          <div class="track" id="watchNowTrack"></div>
-        </div>
-      </section>
-
-      <!-- PLANNING -->
-      <section class="block" id="planningBlock">
-        <div class="blockTop">
-          <div class="sectionTitle">Planning</div>
-          <div class="arrows">
-            <button class="arrow" type="button" data-target="planningTrack" data-dir="-1">❮</button>
-            <button class="arrow" type="button" data-target="planningTrack" data-dir="1">❯</button>
+          <div class="anCard">
+            <div class="anCardTitle">Favorite genre</div>
+            <div class="anCardValue">{{ favorite_genre }}</div>
+            <div class="anCardHint">by view_history</div>
           </div>
-        </div>
 
-        <div class="trackWrap">
-          <div class="track" id="planningTrack"></div>
-        </div>
-      </section>
+          <div class="anCard">
+            <div class="anCardTitle">Top genres count</div>
+            <div class="anCardValue">{{ genre_labels|length }}</div>
+            <div class="anCardHint">in chart</div>
+          </div>
+        </section>
 
-      <!-- Media Modal -->
-      <div class="modal" id="mediaModal" aria-hidden="true">
-        <div class="modalBackdrop" id="mediaModalBackdrop"></div>
+        <section class="anGrid">
+          <div class="anPanel">
+            <div class="anPanelTitle">Genres (top)</div>
 
-        <div class="modalDialog" role="dialog" aria-modal="true" aria-labelledby="mediaModalTitle">
-          <button class="modalClose" id="mediaModalClose" type="button" aria-label="Close">✕</button>
-
-          <div class="modalBody">
-            <div class="modalPoster" id="mediaModalPoster"></div>
-            <div class="modalTrailer hidden" id="mediaModalTrailer"></div>
-
-            <div class="modalText">
-              <div class="modalTitle" id="mediaModalTitle">Loading...</div>
-              <div class="modalMeta" id="mediaModalMeta">—</div>
-              <p class="modalDesc" id="mediaModalDesc">—</p>
-
-              <div class="seriesBtns">
-                <button class="pill" id="btnWatch" type="button">▶ Watch</button>
-                <button class="pill ghost" id="btnTrailer" type="button">🎞 Trailer</button>
-                <button class="pill ghost" id="btnListToggle" type="button">＋ My List</button>
-              </div>
+            <!-- ВАЖНО: контейнер ограничивает размер графика -->
+            <div class="anChartBox">
+              <canvas id="genreChart"></canvas>
             </div>
           </div>
-        </div>
-      </div>
-
+        </section>
+      </section>
     </main>
   </div>
 
-  <!-- Search Modal -->
+  <!-- ====== MODALS for topbar ====== -->
   <div class="modal" id="searchModal" aria-hidden="true">
     <div class="modalBackdrop" id="searchBackdrop"></div>
 
@@ -159,14 +146,12 @@
     </div>
   </div>
 
-  <!-- Profile menu -->
   <div class="profileMenu" id="profileMenu">
     <a href="{{ url_for('settings_page') }}" class="profileMenuItem">👤 Account</a>
     <div class="profileMenuDivider"></div>
     <a href="{{ url_for('logout') }}" class="profileMenuItem danger">⎋ Logout</a>
   </div>
 
-  <!-- Notifications Modal -->
   <div class="modal" id="notifModal" aria-hidden="true">
     <div class="modalBackdrop" id="notifBackdrop"></div>
 
@@ -176,16 +161,37 @@
       <div class="modalBody" style="grid-template-columns: 1fr;">
         <div class="modalTitle" id="notifTitle">Notifications</div>
         <div class="notifList" id="notifList">
-          <div class="notifItem">No notifications yet (MVP)</div>
+          <div class="notifItem">No notifications yet</div>
         </div>
       </div>
     </div>
   </div>
 
-  <script src="{{ url_for('static', filename='layout.js') }}"></script>
-  <script src="{{ url_for('static', filename='media_modal.js') }}"></script>
-  <script src="{{ url_for('static', filename='my_list.js') }}"></script>
+  <!-- общий JS (sidebar/topbar/search/notif/profile) -->
+  <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
 
+  <!-- Chart init -->
+  <script>
+    const genreLabels = {{ genre_labels|tojson }};
+    const genreValues = {{ genre_values|tojson }};
 
+    const canvas = document.getElementById("genreChart");
+    if (canvas && Array.isArray(genreLabels) && genreLabels.length) {
+      new Chart(canvas, {
+        type: "doughnut",
+        data: {
+          labels: genreLabels,
+          datasets: [{ data: genreValues }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false, // ключевое — чтобы график не раздувался
+          plugins: { legend: { position: "bottom" } },
+          cutout: "62%"
+        }
+      });
+    }
+  </script>
 </body>
 </html>
+

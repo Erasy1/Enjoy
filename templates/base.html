@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ENJOY</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pontano+Sans&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+  <div class="layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar" aria-label="Sidebar">
+      <div class="brandRow">
+        <div class="brandBadge" aria-hidden="true">
+          <span class="brandBadgeText">Ej</span>
+        </div>
+      </div>
+
+      <nav class="nav" aria-label="Main navigation">
+        <a class="navItem {{ 'active' if active_page=='home' else '' }}" href="{{ url_for('home') }}">
+          <span class="navIcon">🏠</span><span class="navLabel">Home</span>
+        </a>
+
+        <a class="navItem {{ 'active' if active_page=='movies' else '' }}" href="{{ url_for('movies_page') }}">
+          <span class="navIcon">🎬</span><span class="navLabel">Movies</span>
+        </a>
+
+        <a class="navItem {{ 'active' if active_page=='series' else '' }}" href="{{ url_for('series_page') }}">
+          <span class="navIcon">📺</span><span class="navLabel">Series</span>
+        </a>
+
+        <a class="navItem {{ 'active' if active_page=='my_list' else '' }}" href="{{ url_for('my_list_page') }}">
+          <span class="navIcon">🧾</span><span class="navLabel">My list</span>
+        </a>
+
+        <a class="navItem {{ 'active' if active_page=='analytics' else '' }}" href="{{ url_for('analytics') }}">
+          <span class="navIcon">📊</span><span class="navLabel">Analytics</span>
+        </a>
+
+        <div class="navDivider"></div>
+      </nav>
+
+      <div class="sideBottom">
+        <a class="navItem {{ 'active' if active_page=='account' else '' }}" href="{{ url_for('settings_page') }}">
+          <span class="navIcon">👤</span><span class="navLabel">Account</span>
+        </a>
+        <a class="sideBtn logout" href="{{ url_for('logout') }}">⎋ <span class="navLabel">Logout</span></a>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <button class="sidebarToggle" id="sidebarToggle" type="button" aria-label="Toggle sidebar" title="Toggle sidebar">
+          <span></span><span></span>
+        </button>
+
+        <div class="topActions">
+          <button class="topIcon" id="btnSearch" type="button" aria-label="Search" title="Search">🔍</button>
+          <button class="topIcon" id="btnNotif" type="button" aria-label="Notifications" title="Notifications">🔔</button>
+
+          <button class="profile" id="btnProfile" type="button" aria-label="Profile" title="Profile">
+            <span class="avatar">👤</span>
+            <span class="nick">{{ nickname }}</span>
+          </button>
+        </div>
+      </header>
+
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+
+  <!-- Общие скрипты, которые должны работать везде -->
+  <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

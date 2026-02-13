@@ -15,32 +15,52 @@
 <body>
   <div class="layout">
 
-    <!-- SIDEBAR -->
     <aside class="sidebar" id="sidebar" aria-label="Sidebar">
       <div class="brandRow">
-        <div class="brandBadge" aria-hidden="true"><span class="brandBadgeText">EJ</span></div>
-        <div class="brandText">ENJOY</div>
+        <div class="brandBadge" aria-hidden="true">
+          <span class="brandBadgeText">Ej</span>
+        </div>
       </div>
-
+    
       <nav class="nav" aria-label="Main navigation">
-        <a class="navItem" href="{{ url_for('dashboard') }}"><span class="navIcon">🏠</span><span class="navLabel">Home</span></a>
-        <a class="navItem" href="{{ url_for('movies_page') }}"><span class="navIcon">🎬</span><span class="navLabel">Movies</span></a>
-        <a class="navItem active" href="{{ url_for('series_page') }}"><span class="navIcon">📺</span><span class="navLabel">Series</span></a>
-        <a class="navItem" href="{{ url_for('my_list_page') }}"><span class="navIcon">🧾</span><span class="navLabel">My list</span></a>
-          
-
+        <a class="navItem {{ 'active' if active_page=='home' else '' }}" href="{{ url_for('dashboard') }}">
+          <span class="navIcon">🏠</span><span class="navLabel">Home</span>
+        </a>
+    
+        <a class="navItem {{ 'active' if active_page=='movies' else '' }}" href="{{ url_for('movies_page') }}">
+          <span class="navIcon">🎬</span><span class="navLabel">Movies</span>
+        </a>
+    
+        <a class="navItem {{ 'active' if active_page=='series' else '' }}" href="{{ url_for('series_page') }}">
+          <span class="navIcon">📺</span><span class="navLabel">Series</span>
+        </a>
+    
+        <a class="navItem {{ 'active' if active_page=='my_list' else '' }}" href="{{ url_for('my_list_page') }}">
+          <span class="navIcon">🧾</span><span class="navLabel">My list</span>
+        </a>
+    
+        <a class="navItem {{ 'active' if active_page=='analytics' else '' }}" href="{{ url_for('analytics') }}">
+          <span class="navIcon">📊</span><span class="navLabel">Analytics</span>
+        </a>
+        
+        <a class="navItem {{ 'active' if active_page=='assistant' else '' }}" href="{{ url_for('assistant_page_v2') }}">
+          <span class="navIcon">🤖</span><span class="navLabel">AI Assistant</span>
+        </a>
+        
         <div class="navDivider"></div>
-      <!--
-        <a class="navItem" href="#"><span class="navIcon">👥</span><span class="navLabel">Community</span></a>
-        <a class="navItem" href="#"><span class="navIcon">💬</span><span class="navLabel">Social</span></a>
-        <a class="navItem" href="#"><span class="navIcon">🔥</span><span class="navLabel">Trends</span></a>
-      </nav>-->
-
+      </nav>
+    
       <div class="sideBottom">
-        <a href="{{ url_for('settings_page') }}" class="profileMenuItem">⚙️ Settings</a>
-        <a class="sideBtn logout" href="{{ url_for('logout') }}">⎋ <span class="navLabel">Logout</span></a>
+        <a class="navItem {{ 'active' if active_page=='account' else '' }}" href="{{ url_for('settings_page') }}">
+          <span class="navIcon">👤</span><span class="navLabel">Account</span>
+        </a>
+    
+        <a class="sideBtn logout" href="{{ url_for('logout') }}">
+          ⎋ <span class="navLabel">Logout</span>
+        </a>
       </div>
     </aside>
+    
 
     <!-- MAIN -->
     <main class="main">
@@ -188,7 +208,7 @@
   
   <!-- Profile menu -->
   <div class="profileMenu" id="profileMenu">
-    <a href="{{ url_for('settings_page') }}" class="profileMenuItem">⚙️ Settings</a>
+    <a href="{{ url_for('settings_page') }}" class="profileMenuItem">👤 Account</a>
     <div class="profileMenuDivider"></div>
     <a href="{{ url_for('logout') }}" class="profileMenuItem danger">⎋ Logout</a>
   </div>
@@ -209,8 +229,9 @@
     </div>
   </div>
 
-  <script src="{{ url_for('static', filename='series.js') }}"></script>
+  <script src="{{ url_for('static', filename='layout.js') }}"></script>
   <script src="{{ url_for('static', filename='media_modal.js') }}"></script>
+  <script src="{{ url_for('static', filename='series.js') }}"></script>
 
 </body>
 </html>

@@ -1,0 +1,53 @@
+.anWrap{ padding: 22px 22px 30px; }
+
+.anHeader{ margin-bottom: 14px; }
+.anTitle{ font-size: 26px; font-weight: 700; color: #b07cff; }
+.anSub{ margin-top: 6px; opacity: 0.8; font-size: 14px; }
+
+.anCards{
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.anCard{
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 18px;
+  padding: 14px;
+}
+
+.anCardTitle{ opacity: 0.75; font-size: 13px; }
+.anCardValue{ margin-top: 10px; font-size: 34px; font-weight: 700; }
+.anCardHint{ margin-top: 6px; opacity: 0.75; font-size: 12px; }
+
+.anGrid{
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.anPanel{
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 18px;
+  padding: 14px;
+}
+
+.anPanelTitle{ margin-bottom: 10px; font-size: 16px; font-weight: 700; }
+
+/* ВОТ ЭТО фиксит "слишком большой" */
+.anChartBox{
+  height: 320px;          /* уменьши до 260 если хочешь ещё меньше */
+  max-width: 760px;       /* ограничивает ширину */
+  margin: 0 auto;         /* центрирует */
+  position: relative;     /* нужно Chart.js */
+}
+
+@media (max-width: 980px){
+  .anCards{ grid-template-columns: 1fr; }
+  .anChartBox{ max-width: 100%; height: 280px; }
+}
+

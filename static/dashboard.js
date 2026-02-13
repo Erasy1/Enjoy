@@ -1,8 +1,6 @@
 (function () {
   "use strict";
-
  
-  // Sidebar open,close
   const sidebar = document.getElementById("sidebar");
   const toggle = document.getElementById("sidebarToggle");
   if (toggle && sidebar) {
@@ -13,7 +11,6 @@
   }
 
 
-  // Carousel left,righ
   const stepSmall = 380 + 16;
   const stepRelease = 600 + 16;
 
@@ -28,9 +25,6 @@
       track.scrollBy({ left: dir * localStep, behavior: "smooth" });
     });
   });
-
-  
-  // Helpers
   
   const esc = (s) =>
     String(s ?? "")
@@ -90,9 +84,6 @@
       </a>
     `;
   }
-
-  
-  // Media Modal
   
   const mediaModal = document.getElementById("mediaModal");
   const mediaBackdrop = document.getElementById("mediaModalBackdrop");
@@ -132,9 +123,12 @@
   if (mediaBackdrop) mediaBackdrop.addEventListener("click", closeMediaModal);
   if (mediaClose) mediaClose.addEventListener("click", closeMediaModal);
 
-  async function openTrailerInline(tmdbId) {
+  async function openTrailerInline(tmdbId, mediaType) {
     try {
-      const d = await fetchJSON(`/api/tmdb/trailer/${tmdbId}?lang=ru-RU`);
+      const d = await fetchJSON(
+        `/api/tmdb/trailer/${tmdbId}?lang=ru-RU&type=${encodeURIComponent(mediaType)}`
+      );
+      
       if (!d.key) {
         alert("Trailer not found");
         return;
@@ -175,7 +169,10 @@
     openMediaModal();
 
     try {
-      const data = await fetchJSON(`/api/tmdb/details/${tmdbId}?lang=ru-RU`);
+      const data = await fetchJSON(
+        `/api/tmdb/details/${tmdbId}?lang=ru-RU&type=${encodeURIComponent(mediaType)}`
+      );
+      
       const title = data.title || titleFallback || "Untitled";
       const year = data.release_date ? String(data.release_date).slice(0, 4) : "";
       const genres = Array.isArray(data.genres) ? data.genres : [];
@@ -193,7 +190,7 @@
       }
 
       if (btnWatch) btnWatch.onclick = () => (window.location.href = `/watch/${mediaType}/${tmdbId}`);
-      if (btnTrailer) btnTrailer.onclick = () => openTrailerInline(tmdbId);
+      if (btnTrailer) btnTrailer.onclick = () => openTrailerInline(tmdbId, mediaType);
     } catch (e) {
       console.error("details error:", e);
       if (mTitle) mTitle.textContent = titleFallback || "Failed to load";
@@ -201,25 +198,18 @@
     }
   }
 
-  // Topbar actions: Search, Notifications, Profile
 
   const btnSearch = document.getElementById("btnSearch");
   const btnNotif = document.getElementById("btnNotif");
   const btnProfile = document.getElementById("btnProfile");
-
-  // Search modal refs
   const searchModal = document.getElementById("searchModal");
   const searchBackdrop = document.getElementById("searchBackdrop");
   const searchClose = document.getElementById("searchClose");
   const searchInput = document.getElementById("searchInput");
   const searchResults = document.getElementById("searchResults");
-
-  // Notif modal refs
   const notifModal = document.getElementById("notifModal");
   const notifBackdrop = document.getElementById("notifBackdrop");
   const notifClose = document.getElementById("notifClose");
-
-  // Profile menu
   const profileMenu = document.getElementById("profileMenu");
 
   function openSimpleModal(modal) {
@@ -235,7 +225,6 @@
     document.body.style.overflow = "";
   }
 
-  // Search open,close
   if (btnSearch) btnSearch.onclick = () => {
     if (profileMenu) profileMenu.classList.remove("open");
     openSimpleModal(searchModal);
@@ -248,7 +237,6 @@
   if (searchBackdrop) searchBackdrop.onclick = () => closeSimpleModal(searchModal);
   if (searchClose) searchClose.onclick = () => closeSimpleModal(searchModal);
 
-  // Notif open,close
   if (btnNotif) btnNotif.onclick = () => {
     if (profileMenu) profileMenu.classList.remove("open");
     openSimpleModal(notifModal);
@@ -256,7 +244,6 @@
   if (notifBackdrop) notifBackdrop.onclick = () => closeSimpleModal(notifModal);
   if (notifClose) notifClose.onclick = () => closeSimpleModal(notifModal);
 
-  // Profile dropdown
   if (btnProfile && profileMenu) {
     btnProfile.onclick = (e) => {
       e.preventDefault();
@@ -270,7 +257,6 @@
     });
   }
 
-  // Search logic
   let searchTimer = null;
 
   async function doSearch(q) {
@@ -301,8 +287,6 @@
     });
   }
 
-
-
   document.addEventListener("click", (e) => {
     const a = e.target.closest("a.card");
     if (!a) return;
@@ -323,7 +307,6 @@
   });
 
 
-  // Recommendations
   
   async function loadRecommendations() {
     const recTrack = document.getElementById("recTrack");
@@ -343,7 +326,6 @@
     }
   }
 
-  // Trending
   
   async function loadTrending() {
     const trTrack = document.getElementById("trTrack");
@@ -359,7 +341,6 @@
     }
   }
 
-  // Continue Watching
   async function loadContinueWatching() {
     const cwTrack = document.getElementById("cwTrack");
     if (!cwTrack) return;
@@ -403,7 +384,6 @@
     }
   }
 
-  // Releases carousel + right info panel
   async function loadReleasesCarousel() {
     const track = document.getElementById("relTrack");
     if (!track) return;
@@ -454,7 +434,6 @@
     }
   }
 
-  // Escape closes everything
   document.addEventListener("keydown", (e) => {
     if (e.key !== "Escape") return;
 
@@ -464,7 +443,7 @@
     if (profileMenu) profileMenu.classList.remove("open");
   });
 
-  // Run
+  
   loadReleasesCarousel();
   loadRecommendations();
   loadTrending();
