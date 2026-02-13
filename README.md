@@ -101,12 +101,6 @@ Onboarding answers are converted into a structured preference model:
 * age_limit
 * favorite_titles[] (TMDB IDs)
 
-Preferences are stored in `user_preferences` using:
-
-```sql
-INSERT ... ON CONFLICT(user_id) DO UPDATE
-```
-
 ---
 
 ### Step 2 — Candidate Generation
@@ -127,7 +121,7 @@ Candidates are fetched from two sources:
 For up to 3 favorite titles:
 
 ```
-/{media_type}/{id}/recommendations
+/media_type/id/recommendations
 ```
 
 Each appearance increases similarity weight.
