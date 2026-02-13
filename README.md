@@ -1,129 +1,212 @@
-1. Project Overview
+#  ENJOY – Movie & Series Recommendation Web Application
 
-ENJOY is a web-based movie and TV series recommendation system built with Flask.
-The application helps users discover relevant content based on their preferences, onboarding answers, and interaction history.
+---
 
-The system integrates the TMDB API for real-time movie data and uses a personalized recommendation algorithm to improve user experience.
+##  Project Overview
 
-2. Problem Statement
+**ENJOY** is a web-based movie and TV series recommendation system built with **Flask (Python)**.
 
-Modern users face difficulty choosing movies due to the overwhelming number of available titles across platforms.
-Most platforms provide generic recommendations that do not reflect individual preferences.
+The application generates personalized recommendations using:
 
-Problem:
+* A structured 10-step onboarding system
+* A weighted content-based scoring algorithm
+* Real-time data from the **TMDB API**
+
+The system transforms user preferences into a structured profile and dynamically ranks movies and TV series based on similarity, quality signals, and behavioral preferences.
+
+---
+
+##  Problem Statement
+
+Modern users face difficulty choosing movies due to the overwhelming number of available titles across streaming platforms.
+
+Most platforms provide generic “Top” lists that do not reflect:
+
+* Personal genre preferences
+* Language choices
+* Mood and pace preferences
+* Plot complexity
+
+### Core Problem
+
 Users spend excessive time searching for content instead of watching it.
 
-3. Project Objectives
+---
 
-Implement secure user authentication.
+##  Project Objectives
 
-Collect user preferences through onboarding questions.
+* Implement secure user authentication (password hashing + session management)
+* Collect structured user preferences via onboarding (10-step model)
+* Design and implement a weighted recommendation algorithm
+* Integrate the TMDB API for real-time catalog access
+* Store and update user preferences efficiently in SQLite
+* Apply hard filtering (blocked genres, age restriction)
+* Ensure clean UI and smooth navigation
+* Provide reproducible Windows deployment setup
 
-Generate personalized movie and series recommendations.
+---
 
-Provide filtering (genre, year, country).
+##  Key Features
 
-Integrate external API (TMDB).
+*  User registration & login (secure password hashing using Werkzeug)
+*  10-step onboarding preference system
+*  Personalized recommendations (cold start + favorites-based)
+*  Movie & TV browsing via TMDB
+*  Filtering by genre, language, and content type
+*  Blocked genres support
+*  Favorites-based similarity boost
+*  Settings & preferences management
+*  SQLite database with UPSERT logic
+*  Hard filtering + weighted scoring formula
+*  Error handling and input normalization
 
-Store user data securely in a database.
+---
 
-Ensure clean UI and smooth navigation.
+##  Technologies Used
 
-Provide deployable and reproducible project setup.
+### Backend
 
-4. Features
+* Python 3.x
+* Flask
+* SQLite
+* Requests (TMDB API)
+* Werkzeug (password hashing)
+* JSON serialization (stored in DB)
+* Logging (optional extension)
 
-User registration and login (secure password hashing)
+### Frontend
 
-Onboarding system (10-step preference form)
+* HTML
+* CSS
+* JavaScript
+* Jinja Templates
 
-Personalized recommendations
+---
 
-Movie and series browsing
+##  Recommendation Method
 
-Search and filtering (genre, year, country)
+The recommendation engine uses a **content-based weighted scoring model**.
 
-Watchlist / user preferences
+### Step 1 — Preferences Construction
 
-Settings page (profile management)
+Onboarding answers are converted into a structured preference model:
 
-TMDB API integration
+* content_type (movie / tv / both)
+* languages[]
+* liked_genres[]
+* blocked_genres[]
+* pace (fast / medium / slow)
+* mood (light / tense / inspiring / dark / think / mixed)
+* plot_complexity (simple / medium / complex)
+* age_limit
+* favorite_titles[] (TMDB IDs)
 
-Error handling and input validation
+Preferences are stored in `user_preferences` using:
 
-5. Technologies Used
-Backend
+```sql
+INSERT ... ON CONFLICT(user_id) DO UPDATE
+```
 
-Python
+---
 
-Flask
+### Step 2 — Candidate Generation
 
-SQLite
+Candidates are fetched from two sources:
 
-TMDB API
+#### A) TMDB Discover API
 
-Werkzeug (password hashing)
+* with_genres
+* without_genres
+* with_original_language
+* include_adult (based on age_limit)
+* vote_count.gte = 50
+* sorted by popularity
 
-Logging module
+#### B) Similar to Favorite Titles
 
-Frontend
+For up to 3 favorite titles:
 
-HTML
+```
+/{media_type}/{id}/recommendations
+```
 
-CSS
+Each appearance increases similarity weight.
 
-JavaScript
+---
 
-6. Recommendation Method
+### Step 3 — Feature Engineering
 
-The recommendation system is based on a content-based scoring approach.
+Each candidate is normalized into values between 0 and 1:
 
-Logic:
+| Feature | Description                      |
+| ------- | -------------------------------- |
+| G       | Genre similarity (Jaccard index) |
+| S       | Similarity to favorites          |
+| L       | Language match                   |
+| R       | Rating (vote_average / 10)       |
+| P       | Popularity (log normalized)      |
+| T       | Pace signal                      |
+| M       | Mood signal                      |
+| C       | Complexity signal                |
+| Type    | Movie/TV preference match        |
 
-User answers onboarding questions (genres, pace, mood, etc.).
+---
 
-Preferences are converted into weighted genre vectors.
+### Step 4 — Final Scoring Formula
 
-Movies fetched from TMDB are scored based on:
+```
+Score =
+5·G +
+6·S +
+1·L +
+2·R +
+1·P +
+0.7·T +
+0.7·M +
+0.7·C +
+0.5·Type
+```
 
-Genre match
+Movies are sorted by score, and the top-N results are returned.
 
-Popularity
+---
 
-Rating
+### Hard Filtering
 
-Year (optional weight)
+* Blocked genres are removed even if the score is high.
+* Age limit controls adult content.
+* vote_count.gte prevents unreliable ratings.
 
-Highest scored movies are returned as recommendations.
+---
 
-Future improvement may include:
+### Why Audio Preference Is Not Used in Formula
 
-TF-IDF vectorization of movie descriptions
+TMDB does not guarantee platform-level audio/subtitle availability.
+Therefore, audio preference is stored but not included in scoring.
 
-Cosine similarity for advanced content-based filtering
+---
 
-7. Database Design
+##  Database Design
 
-Main tables:
+### users
 
-users
+* id (PK)
+* nickname
+* email (UNIQUE)
+* password_hash
+* created_at
 
-id (PK)
+### onboarding_answers
 
-nickname
+* id (PK)
+* user_id (FK)
+* question_key (q1–q9)
+* answer (JSON or string)
 
-email (unique)
+### user_preferences
 
-password_hash
+* user_id (PK)
+* structured JSON fields
+* normalized labels
+* updated_at
 
-created_at
-
-onboarding_answers
-
-id (PK)
-
-user_id (FK)
-
-answers (JSON format)
-
-The database is automatically initialized on first run.
